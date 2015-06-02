@@ -2,3 +2,4 @@ combinedchoices
 local_*
 *.pyc
 db.sqlite3
+.coverage

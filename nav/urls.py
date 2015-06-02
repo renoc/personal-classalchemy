@@ -1,11 +1,7 @@
 from django.conf.urls import include, url
-from django.contrib import admin
-import views
-
-
-admin.autodiscover()
+import nav.views as views
 
 
 urlpatterns = [
-    url(r'^$', views.Home.as_view())
+    url(r'^($|index)', views.Home.as_view())
 ]

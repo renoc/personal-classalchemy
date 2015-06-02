@@ -19,6 +19,9 @@ from django.contrib import admin
 import nav.urls
 
 
+admin.autodiscover()
+
+
 urlpatterns = [
     url(r'^', include(nav.urls)),
     url(r'^admin/', include(admin.site.urls)),
