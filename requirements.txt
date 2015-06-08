@@ -1,4 +1,1 @@
-coverage
-ipython
 jsonfield
-model-mommy

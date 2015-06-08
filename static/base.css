@@ -1,11 +1,17 @@
-html * { padding:0; margin:0; }
-body * { padding:10px 20px; }
-body * * { padding:0; }
-body { font:small sans-serif; }
+.header {
+    color: #FFF;
+    background: #000;
+    font-family: Georgia, serif;
+    font-variant: small-caps;
+}
+.hpad { padding: 0px 10px; }
+.dpad { padding: 10px; }
+body { font-family: Verdana, sans-serif; }
+h1 { font-size: xx-large; }
+h2 { font-size: x-large; }
+
+// Imported from django example files
 body>div { border-bottom:1px solid #ddd; }
-h1 { font-weight:normal; }
-h2 { margin-bottom:.8em; }
-h2 span { font-size:80%; color:#666; font-weight:normal; }
 h3 { margin:1em 0 .5em 0; }
 h4 { margin:0 0 .5em 0; font-weight: normal; }
 table { border:1px solid #ccc; border-collapse: collapse; width:100%; background:white; }
