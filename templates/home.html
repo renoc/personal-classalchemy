@@ -1,21 +1,17 @@
-{% load staticfiles %}
-<!DOCTYPE html>
-<html lang="en"><head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <link rel="canonical" href="http://classalchemy.pythonanywhere.com/" />
-    <title>Class Alchemy</title>
-    <link rel="stylesheet" type="text/css" href="{% static "base.css" %}">
-</head><body>
+{% extends 'base.html' %}
 
-<div class="header">
-    <h2 class="hpad">Class Alchemy</h2>
-</div>
-<div id="summary">
-    <h1 class="dpad">Hello Dungeon World</h1>
-</div>
+    {% block html-head %}
+        <link rel="canonical" href="http://classalchemy.pythonanywhere.com/" />
+        <title>Class Alchemy Homepage</title>
+    {% endblock html-head %}
+    {% block h1 %}Class Alchemy{% endblock h1 %}
+
+{% block content %}
 <p>
-This website is: <b>Non-Functional</b>, still working on it. Last update of "Last Update": 2015-06-08.
+    Hello Dungeon World fans!
 </p>
-
-</body></html>
+<p>
+    This website is: <b>Non-Functional</b>, still working on it. Last update of "Last Update": 2015-06-09.
+</p>
+{% endblock content %}
 

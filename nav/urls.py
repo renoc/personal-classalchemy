@@ -6,4 +6,5 @@ import nav.views as views
 
 urlpatterns = [
     url(r'^($|index)', views.Home.as_view()),
+    url(r'^about', views.About.as_view()),
 ] + accounts_urls.urlpatterns

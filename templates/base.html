@@ -1,0 +1,21 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    {% block html-head %}
+    <title>Class Alchemy</title>
+    {% endblock html-head %}
+    <link rel="stylesheet" type="text/css" href="{% static "base.css" %}">
+</head><body>
+
+<div class="header">
+    <h2 class="hpad"><a href="/">Class Alchemy</a></h2>
+    <span><a href="/about">About</a></span>
+    <span><a href="/login">Login</a></span>
+</div>
+<div class="h1">
+    <h1>{% block h1 %}Hello Dungeon World{% endblock h1 %}</h1>
+</div>
+{% block content %}
+{% endblock content %}
+</body></html>

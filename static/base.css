@@ -4,25 +4,30 @@
     font-family: Georgia, serif;
     font-variant: small-caps;
 }
-.hpad { padding: 0px 10px; }
-.dpad { padding: 10px; }
-body { font-family: Verdana, sans-serif; }
-h1 { font-size: xx-large; }
-h2 { font-size: x-large; }
-
-// Imported from django example files
-body>div { border-bottom:1px solid #ddd; }
-h3 { margin:1em 0 .5em 0; }
-h4 { margin:0 0 .5em 0; font-weight: normal; }
-table { border:1px solid #ccc; border-collapse: collapse; width:100%; background:white; }
-tbody td, tbody th { vertical-align:top; padding:2px 3px; }
-thead th {
-    padding:1px 6px 1px 3px; background:#fefefe; text-align:left;
-    font-weight:normal; font-size:11px; border:1px solid #ddd;
+.header a {
+    color:inherit;
+    text-decoration:none;
 }
-tbody th { width:12em; text-align:right; color:#666; padding-right:.5em; }
-#summary { background: #e0ebff; }
-#summary h2 { font-weight: normal; color: #666; }
-#explanation { background:#eee; }
-#instructions { background:#f6f6f6; }
-#summary table { border:none; background:transparent; }
+.header span {
+    padding: 0em 1em;
+    vertical-align: 16%;
+}
+
+.hpad {
+    display: inline-block;
+    margin: 0em;
+    padding: 0em 1em;
+ }
+.dpad { padding: 1em; }
+body { font-family: Verdana, sans-serif; }
+h1 {
+    font-size: xx-large;
+    padding: 0.5em 1em;
+}
+h2 {
+    font-size: x-large;
+}
+
+.h1 {
+    background: #9DF;
+}
