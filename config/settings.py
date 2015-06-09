@@ -1,18 +1,11 @@
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
-
 ALLOWED_HOSTS = [
+    '127.0.0.1',
     'classalchemy.pythonanywhere.com',
 ]
-
-# Application definition
-
 
 DEFAULT_APPS = (
     'django.contrib.admin',
@@ -30,10 +23,11 @@ THIRD_PARTY_APPS = (
 
 LOCAL_APPS = (
     'nav',
+    'accounts',
 )
 
-DEBUG_APPS = (
-)
+# Replace in local_settings for developement
+DEBUG_APPS = ()
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -44,14 +38,28 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'nav.middleware.SSLMiddleware',
 )
 
 ROOT_URLCONF = 'config.urls'
 
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+HTTPS_SUPPORT = True
+SECURE_REQUIRED_PATHS = (
+    '/admin/',
+)
+
+
+TEMPLATE_DIRS = [
+    BASE_DIR + '/templates/',
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': TEMPLATE_DIRS,
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

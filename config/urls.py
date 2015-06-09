@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from nav.decorators import ssl_required
 import nav.urls
 
 

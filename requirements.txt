@@ -1,1 +1,3 @@
 jsonfield
+model-mommy
+mox
