@@ -1,7 +1,9 @@
-from django.forms import ValidationError
-from django.contrib.auth import _get_backends, authenticate
+from django.conf import settings
+from django.contrib.auth import load_backend
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ImproperlyConfigured
+from django.forms import ValidationError
 
 
 class UsernameLoginForm(AuthenticationForm):
@@ -10,11 +12,23 @@ class UsernameLoginForm(AuthenticationForm):
         super(UsernameLoginForm, self).__init__(*args, **kwargs)
         self.fields['password'].required = False
 
+    def authenticate(self):
+        for backend in settings.AUTHENTICATION_BACKENDS:
+            user = self.user_cache
+            if user == load_backend(backend).get_user(user.pk):
+                self.user_cache.backend = backend
+                return self.user_cache
+        return None
+
     def clean(self):
         username = self.cleaned_data.get('username')
         if self.user_cache:
-            self.hack_backend()
-            self.confirm_login_allowed(self.user_cache)
+            self.authenticate()
+            if hasattr(self.user_cache, 'backend'):
+                self.confirm_login_allowed(self.user_cache)
+            else:
+                raise ImproperlyConfigured(
+                    "Unexpected Authentication Error. Contact Admin.")
         return self.cleaned_data
 
     def clean_password(self):
@@ -30,12 +44,7 @@ class UsernameLoginForm(AuthenticationForm):
             if user.has_usable_password():
                 raise ValidationError("User Password is set")
             else:
+                assert(user.is_staff is False)
+                assert(user.is_superuser is False)
                 self.user_cache = user
         return data
-
-    def hack_backend(self):
-        # This is a terrible hack, do not use if data is important
-        assert(self.user_cache.is_staff is False)
-        assert(self.user_cache.is_superuser is False)
-        backend, backend_path = _get_backends(return_tuples=True)[0]
-        self.user_cache.backend = backend_path
