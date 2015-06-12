@@ -1,17 +1,65 @@
-from django.contrib.auth import load_backend
+from django.contrib import auth
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.forms import ValidationError
 from django.test import TestCase
 from django.test.client import RequestFactory
+from django.views.generic.base import RedirectView
 import mox
 
-from accounts.forms import UsernameLoginForm
-from accounts.views import LoginView
+from accounts import utils
+from accounts.forms import UsernameCreationForm, UsernameLoginForm
+from accounts.views import CreateUserView, LoginView, LogoutView
 
 
-class FormTests(TestCase):
+class CreationFormTests(TestCase):
+
+    def setUp(self):
+        self.moxx = mox.Mox()
+        form = self.form = UsernameCreationForm()
+        form.cleaned_data = {
+            'username': 'userfoo', 'password1': '', 'password2': ''}
+
+    def tearDown(self):
+        self.moxx.UnsetStubs()
+
+    def test_save(self):
+        user = self.form.save()
+        self.assertFalse(user.has_usable_password())
+
+    def test_clean_password_with_password(self):
+        self.form.cleaned_data['password1'] = 'password'
+        self.assertRaises(ValidationError, self.form.clean_password2)
+
+    def test_clean_password_success(self):
+        self.assertEqual('', self.form.clean_password2())
+
+
+class UtilTests(TestCase):
+
+    def setUp(self):
+        self.moxx = mox.Mox()
+        self.user = User.objects.create(username='userfoo')
+
+    def tearDown(self):
+        self.moxx.UnsetStubs()
+
+    def test_authenticate_pass(self):
+        self.assertEqual(self.user, utils.authenticate_without_password(self.user))
+
+    def test_authenticate_fail(self):
+        self.moxx.StubOutWithMock(ModelBackend, 'get_user')
+        ModelBackend.get_user(self.user.pk).AndReturn(None)
+
+        self.moxx.ReplayAll()
+        user = utils.authenticate_without_password(self.user)
+        self.moxx.VerifyAll()
+
+        self.assertEqual(user, None)
+
+
+class LoginFormTests(TestCase):
     # Precise vailidation error must be detected with coverage
 
     def setUp(self):
@@ -23,22 +71,9 @@ class FormTests(TestCase):
     def tearDown(self):
         self.moxx.UnsetStubs()
 
-    def test_authenticate_pass(self):
-        self.assertEqual(self.user, self.form.authenticate())
-
-    def test_authenticate_fail(self):
-        self.moxx.StubOutWithMock(ModelBackend, 'get_user')
-        ModelBackend.get_user(self.user.pk).AndReturn(None)
-
-        self.moxx.ReplayAll()
-        user = self.form.authenticate()
-        self.moxx.VerifyAll()
-
-        self.assertEqual(user, None)
-
     def test_clean_success(self):
-        self.moxx.StubOutWithMock(self.form, 'authenticate')
-        self.form.authenticate().AndReturn(self.user)
+        self.moxx.StubOutWithMock(utils, 'authenticate_without_password')
+        utils.authenticate_without_password(self.user).AndReturn(self.user)
         self.moxx.StubOutWithMock(self.form, 'confirm_login_allowed')
         self.form.confirm_login_allowed(self.user).AndReturn(True)
 
@@ -51,8 +86,8 @@ class FormTests(TestCase):
         # all mocked functions called
 
     def test_clean_fail(self):
-        self.moxx.StubOutWithMock(self.form, 'authenticate')
-        self.form.authenticate().AndReturn(self.user)
+        self.moxx.StubOutWithMock(utils, 'authenticate_without_password')
+        utils.authenticate_without_password(self.user).AndReturn(self.user)
         self.moxx.StubOutWithMock(self.form, 'confirm_login_allowed')
 
         self.moxx.ReplayAll()
@@ -61,7 +96,7 @@ class FormTests(TestCase):
 
     def test_clean_no_user(self):
         # clean_password method will have already thrown a form error
-        self.moxx.StubOutWithMock(self.form, 'authenticate')
+        self.moxx.StubOutWithMock(utils, 'authenticate_without_password')
         self.moxx.StubOutWithMock(self.form, 'confirm_login_allowed')
 
         self.form.user_cache = None
@@ -97,6 +132,21 @@ class ViewTests(TestCase):
     def tearDown(self):
         self.moxx.UnsetStubs()
 
+    def test_create_user(self):
+        view = CreateUserView()
+        view.request = 'request'
+
+        form = self.moxx.CreateMock(UsernameCreationForm)
+        form.save().AndReturn('user')
+        self.moxx.StubOutWithMock(utils, 'authenticate_without_password')
+        utils.authenticate_without_password('user').AndReturn('user')
+        self.moxx.StubOutWithMock(auth, 'login')
+        auth.login('request', 'user')
+
+        self.moxx.ReplayAll()
+        view.form_valid(form)
+        self.moxx.VerifyAll()
+
     def test_login(self):
         user = User.objects.create(username='userfoo')
         user.backend = ''
@@ -116,3 +166,17 @@ class ViewTests(TestCase):
         self.moxx.VerifyAll()
 
         self.assertTrue(request.user)
+
+    def test_logout(self):
+        view = LogoutView()
+
+        self.moxx.StubOutWithMock(auth, 'logout')
+        auth.logout('request')
+        self.moxx.StubOutWithMock(RedirectView, 'dispatch')
+        RedirectView.dispatch('request')
+
+        self.moxx.ReplayAll()
+        view.dispatch('request')
+        self.moxx.VerifyAll()
+
+        # mocked functions called

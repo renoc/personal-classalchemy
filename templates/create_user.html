@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+    {% block html-head %}
+        <link rel="canonical" href="https://classalchemy.pythonanywhere.com/create_user" />
+        <title>Class Alchemy New User</title>
+    {% endblock html-head %}
+    {% block h1 %}Create an Account{% endblock h1 %}
+
+{% block content %}
+<form method="post">
+    {{ form.non_field_errors }}
+    {% csrf_token %}
+    <div class="fieldWrapper">
+        {{ form.username.errors }}
+        <label for="{{ form.username.id_for_label }}">Username</label>
+       <p> {{ form.username }}</p>
+    </div>
+    <div class="fieldWrapper">
+        {{ form.password2.errors }}
+        <label for="{{ form.password2.id_for_label }}">Password - *This Must Be Left Blank</label>
+        <p>{{ form.password2 }}</p>
+    </div>
+    <button type='submit'>Create</submit>
+</form>
+{% endblock content %}
+

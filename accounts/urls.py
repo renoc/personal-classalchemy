@@ -5,5 +5,7 @@ import accounts.views as views
 
 
 urlpatterns = [
-    url(r'^login', ssl_required(views.LoginView.as_view()))
+    url(r'^create_user', ssl_required(views.CreateUserView.as_view())),
+    url(r'^login', ssl_required(views.LoginView.as_view())),
+    url(r'^logout', ssl_required(views.LogoutView.as_view())),
 ]

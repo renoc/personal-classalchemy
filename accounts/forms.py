@@ -1,9 +1,34 @@
 from django.conf import settings
 from django.contrib.auth import load_backend
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.forms import ValidationError
+
+from accounts import utils
+
+
+class UsernameCreationForm(UserCreationForm):
+
+    def __init__(self, *args, **kwargs):
+        super(UserCreationForm, self).__init__(*args, **kwargs)
+        self.fields['password1'].required = False
+        self.fields['password2'].required = False
+
+    def clean_password2(self):
+        password1 = self.cleaned_data['password1']
+        password2 = self.cleaned_data['password2']
+        if password1 or password2:
+            raise ValidationError("Do Not enter a password")
+        return password2
+
+    def save(self, commit=True):
+        # Call super on parent class to overwrite the function
+        user = super(UserCreationForm, self).save(commit=False)
+        user.set_unusable_password()
+        if commit:
+            user.save()
+        return user
 
 
 class UsernameLoginForm(AuthenticationForm):
@@ -12,18 +37,11 @@ class UsernameLoginForm(AuthenticationForm):
         super(UsernameLoginForm, self).__init__(*args, **kwargs)
         self.fields['password'].required = False
 
-    def authenticate(self):
-        for backend in settings.AUTHENTICATION_BACKENDS:
-            user = self.user_cache
-            if user == load_backend(backend).get_user(user.pk):
-                self.user_cache.backend = backend
-                return self.user_cache
-        return None
-
     def clean(self):
         username = self.cleaned_data.get('username')
         if self.user_cache:
-            self.authenticate()
+            self.user_cache = utils.authenticate_without_password(
+                self.user_cache)
             if hasattr(self.user_cache, 'backend'):
                 self.confirm_login_allowed(self.user_cache)
             else:
