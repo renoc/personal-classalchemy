@@ -4,12 +4,18 @@
     font-family: Georgia, serif;
     font-variant: small-caps;
 }
+.header a:hover {
+    color: #9CF;
+}
 .header a {
     color:inherit;
     text-decoration:none;
 }
-.header span {
-    padding: 0em 1em;
+.header span, .header>a {
+    background-image: url(/static/white-slash.png);
+    background-repeat: no-repeat;
+    background-position: -1px -2px;
+    padding: 6px 1em 6px 2em;
     vertical-align: 15%;
 }
 #username_display {
@@ -22,6 +28,9 @@
     height: 1.15em;
 }
 
+.align-right {
+    float: right;
+}
 .hpad {
     display: inline-block;
     margin: 0em;

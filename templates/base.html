@@ -10,17 +10,15 @@
 
 <div class="header">
     <h2 class="hpad"><a href="/">Class Alchemy</a></h2>
-    <span><a href="/about">About</a></span>
-        {% if user.is_authenticated %}
-            <span><a href="/logout">Logout</a></span>
-            <span>User</span>
-            <span><input type="text" id="username_display" value="{{ user.get_username }}" readonly /></span>
-        {% else %}
-            <span><a href="/create_user">Create User</a></span>
-            <span><a href="/login">Login</a></span>
-            <span>No User</span>
-            <span><input type="text" id="username_display" value="" readonly /></span>
-        {% endif %}
+    <a href="/about">About</a>
+{% if user.is_authenticated %}
+    <a href="/logout">Logout</a>
+    <span>User <input type="text" id="username_display" value="{{ user.get_username }}" readonly /></span>
+{% else %}
+    <a href="/create_user">Create User</a>
+    <a href="/login">Login</a>
+    <span>No User <input type="text" id="username_display" value="" readonly /></span>
+{% endif %}
 </div>
 <div class="h1">
     <h1>{% block h1 %}Hello Dungeon World{% endblock h1 %}</h1>
