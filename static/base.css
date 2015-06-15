@@ -1,3 +1,7 @@
+.main .main, .about .about, .create_user .create_user, .login .login, .compendium .compendium {
+    color: #FC9;
+}
+
 .header {
     color: #FFF;
     background: #000;
@@ -12,7 +16,7 @@
     text-decoration:none;
 }
 .header span, .header>a {
-    background-image: url(/static/white-slash.png);
+    background-image: url("/static/white-slash.png");
     background-repeat: no-repeat;
     background-position: -1px -2px;
     padding: 6px 1em 6px 2em;
@@ -22,10 +26,11 @@
     background: #FFF;
     border: none;
     color: transparent;
-    text-shadow: 0px 0px 0px #000;
     font-size: medium;
-    width: 10em;
     height: 1.15em;
+    margin-left: 1em;
+    text-shadow: 0px 0px 0px #000;
+    width: 10em;
 }
 
 .align-right {
@@ -48,4 +53,7 @@ h2 {
 
 .h1 {
     background: #9DF;
+}
+.errorlist {
+    background: #F9C;
 }

@@ -152,6 +152,7 @@ class ViewTests(TestCase):
         user.backend = ''
         view = LoginView()
         request = RequestFactory()
+        request.GET = {}
         request.META = {}
         request.user = None
         request.session = self.client.session

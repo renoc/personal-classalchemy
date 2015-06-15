@@ -17,6 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from nav.decorators import ssl_required
+import dwclasses.urls
 import nav.urls
 
 
@@ -25,5 +26,6 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^', include(nav.urls)),
+    url(r'^', include(dwclasses.urls)),
     url(r'^admin/', include(admin.site.urls)),
 ]

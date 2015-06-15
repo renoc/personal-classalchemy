@@ -20,8 +20,11 @@ class CreateUserView(FormView):
 
 class LoginView(FormView):
     form_class = UsernameLoginForm
-    success_url = '/'
     template_name = 'login.html'
+
+    def get_success_url(self):
+        self.success_url = self.request.GET.get('next', '/compendiumclasses/')
+        return super(LoginView, self).get_success_url()
 
     def form_valid(self, form):
         auth.login(self.request, form.get_user())

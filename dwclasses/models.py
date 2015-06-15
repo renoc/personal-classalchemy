@@ -34,14 +34,24 @@ class CombinedClass(ReadyCombinedObj):
             return '%s - %s' % (self.user.username, self.form_name)
 
 
+class CompendiumClassManager(models.QuerySet):
+    def get_list(self, user):
+        return self.filter(user=user)
+
+
 class CompendiumClass(BaseCCObj):
     user = models.ForeignKey(User, null=True, blank=True)
+    objects = CompendiumClassManager.as_manager()
 
     def __unicode__(self):
         if not self.user:
             return super(CompendiumClass, self).__unicode__()
         else:
             return '%s - %s' % (self.user.username, self.form_name)
+
+    @property
+    def name(self):
+        return self.form_name
 
 
 class CompletedCharacter(CompletedCombinedObj):

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% block pagetype %} class="main"{% endblock pagetype %}
     {% block html-head %}
         <link rel="canonical" href="http://classalchemy.pythonanywhere.com/" />
         <title>Class Alchemy Homepage</title>
@@ -10,8 +11,8 @@
 <p>
     Hello Dungeon World fans!
 </p>
-<p>
-    This website is: <b>Non-Functional</b>, still working on it. Last update of "Last Update": 2015-06-12.
+<p class="errorlist">
+    This website is: <b>Non-Functional</b>, still working on it. Last update of "Last Update": 2015-06-14.
 </p>
 {% endblock content %}
 

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="compendium"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Compendium Classes</title>
+    {% endblock html-head %}
+    {% block h1 %}Your Compendium Classes{% endblock h1 %}
+
+{% block content %}
+{% if object_list.exists %}
+    {% for compendiumclass in object_list %}
+        {{ compendiumclass.name }}
+    {% endfor %}
+{% else %}
+    <p>You have no classes saved.</p>
+{% endif %}
+{% endblock content %}
+
