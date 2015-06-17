@@ -1,6 +1,29 @@
-.main .main, .about .about, .create_user .create_user, .login .login, .compendium .compendium {
+.main .main, .about .about, .create_user .create_user, .login .login, .compendium .compendium, .user .user {
     color: #FC9;
 }
+
+.hpad {
+    display: inline-block;
+    margin: 0em;
+    padding: 0em 1em;
+ }
+.dpad { padding: 1em; }
+.align-right { float: right; }
+.high-top { margin-top: 40px; }
+body { font-family: Verdana, sans-serif; }
+#tricon { margin: -50px 15px -10px -15px; }
+h1 {
+    color: #FFF;
+    background: #000;
+    display: inline-block;
+    font-family: Georgia, serif;
+    font-size: xx-large;
+    font-variant: small-caps;
+    padding: 0.2em 1em;
+}
+h2 { font-size: x-large; }
+ul { margin-top: 0px; }
+.errorlist { background: #F9C; }
 
 .header {
     color: #FFF;
@@ -29,31 +52,27 @@
     font-size: medium;
     height: 1.15em;
     margin-left: 1em;
+    text-align: center;
     text-shadow: 0px 0px 0px #000;
     width: 10em;
 }
 
-.align-right {
-    float: right;
-}
-.hpad {
+.button {
+    border-radius: 12px;
+    border-size: 3px;
+    border-style: solid;
     display: inline-block;
-    margin: 0em;
-    padding: 0em 1em;
- }
-.dpad { padding: 1em; }
-body { font-family: Verdana, sans-serif; }
-h1 {
-    font-size: xx-large;
-    padding: 0.5em 1em;
+    margin: 2px 0px;
+    padding: 6px;
+    text-decoration: None
 }
-h2 {
-    font-size: x-large;
+.green {
+    background: #6F6;
+    border-color: #090;
+    color: #000;
 }
-
-.h1 {
-    background: #9DF;
-}
-.errorlist {
-    background: #F9C;
+.blue {
+    background: #66F;
+    border-color: #009;
+    color: #FFF;
 }

@@ -10,7 +10,7 @@ import mox
 
 from accounts import utils
 from accounts.forms import UsernameCreationForm, UsernameLoginForm
-from accounts.views import CreateUserView, LoginView, LogoutView
+from accounts.views import CreateUserView, EditUserView, LoginView, LogoutView
 
 
 class CreationFormTests(TestCase):
@@ -146,6 +146,15 @@ class ViewTests(TestCase):
         self.moxx.ReplayAll()
         view.form_valid(form)
         self.moxx.VerifyAll()
+
+    def test_edit_user(self):
+        user = User.objects.create(username='userfoo')
+        view = EditUserView()
+        request = RequestFactory()
+        request.user = user
+        view.request = request
+
+        self.assertEqual(user, view.get_object())
 
     def test_login(self):
         user = User.objects.create(username='userfoo')

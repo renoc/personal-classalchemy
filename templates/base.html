@@ -14,16 +14,17 @@
 {% if user.is_authenticated %}
     <a href="/compendiumclasses/" class="compendium" rel="nofollow">Compendium Classes</a>
     <a href="/logout">Logout</a>
-    <span>User <input type="text" id="username_display" value="{{ user.get_username }}" readonly /></span>
+    <span>
+        <a href="/account/" class="user">User</a>
+        <input type="text" id="username_display" value="{{ user.get_username }}" readonly />
+    </span>
 {% else %}
     <a href="/create_user" class="create_user">Create User</a>
     <a href="/login" class="login">Login</a>
     <span>No User <input type="text" id="username_display" value="" readonly /></span>
 {% endif %}
 </div>
-<div class="h1">
-    <h1>{% block h1 %}Hello Dungeon World{% endblock h1 %}</h1>
-</div>
+{% block h1 %}<h1>Hello Dungeon World</h1>{% endblock h1 %}
 {% block content %}
 {% endblock content %}
 </body></html>

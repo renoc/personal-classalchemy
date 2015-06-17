@@ -6,10 +6,13 @@ from django.views.generic.list import ListView
 from model_mommy import mommy
 import mox
 
+from dwclasses.forms import CompendiumClassForm
 from dwclasses.models import (
     ClassChoice, CombinedClass, CompendiumClassManager, CompendiumClass,
     CompletedCharacter)
-from dwclasses.views import ListCompendiumClassesView
+from dwclasses.views import (
+    CreateCompendiumClassView, EditCompendiumClassView,
+    ListCompendiumClassesView)
 
 
 class Unicode_Tests(TestCase):
@@ -61,13 +64,13 @@ class CompendiumClass_ModelTests(TestCase):
         mod = CompendiumClass(form_name=testname)
         self.assertEqual(mod.name, testname)
 
-    def test_get_list(self):
+    def test_get_user_classes(self):
         user = User(username='testuser')
         user.save()
         mod = CompendiumClass(form_name='testuni', user=user)
         mod.save()
         self.assertEqual(
-            mod, CompendiumClass.objects.get_list(user=user).get())
+            mod, CompendiumClass.objects.get_user_classes(user=user).get())
 
 
 class View_Tests(TestCase):
@@ -84,8 +87,8 @@ class View_Tests(TestCase):
         view = ListCompendiumClassesView()
         view.request = request
 
-        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_list')
-        CompendiumClassManager.get_list(user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_user_classes')
+        CompendiumClassManager.get_user_classes(user=user).AndReturn(None)
         self.moxx.StubOutWithMock(ListView, 'get_queryset')
         ListView.get_queryset().AndReturn(None)
 
@@ -94,3 +97,50 @@ class View_Tests(TestCase):
         self.moxx.VerifyAll()
 
         # all mocked functions called
+
+    def test_create_compendium_get_success_url(self):
+        view = CreateCompendiumClassView()
+        view.object = CompendiumClass(form_name='testcc', id=99)
+        self.assertTrue(view.get_success_url(), "/compendiumclasses/99")
+
+    def test_create_compendium_class_form_valid(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = CreateCompendiumClassView()
+        view.request = request
+        comp = CompendiumClassForm()
+        comp.cleaned_data = {'form_name': 'testcc'}
+
+        self.moxx.StubOutWithMock(CreateCompendiumClassView, 'get_success_url')
+        CreateCompendiumClassView.get_success_url().AndReturn(None)
+
+        self.assertFalse(CompendiumClass.objects.all().exists())
+
+        self.moxx.ReplayAll()
+        view.form_valid(form=comp)
+        self.moxx.VerifyAll()
+
+        self.assertTrue(CompendiumClass.objects.all().exists())
+
+    def test_edit_compendium_class_get_object(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = EditCompendiumClassView()
+        view.request = request
+        view.kwargs = {'id': 0}
+
+        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_or_404')
+        CompendiumClassManager.get_or_404(id=0, user=user).AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_object()
+        self.moxx.VerifyAll()
+
+        # all mocked functions called
+
+    def test_edit_compendium_class_success_url(self):
+        view = EditCompendiumClassView()
+        view.object = CompendiumClass(form_name='testcc', id=99)
+        self.assertTrue(view.get_success_url(), "/compendiumclasses/99")

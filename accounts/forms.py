@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.forms import ValidationError
+from django.forms.models import ModelForm
 
 from accounts import utils
 
@@ -29,6 +30,12 @@ class UsernameCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class UsernameEditForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ('username',)
 
 
 class UsernameLoginForm(AuthenticationForm):

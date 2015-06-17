@@ -5,7 +5,7 @@
         <link rel="canonical" href="https://classalchemy.pythonanywhere.com/create_user" />
         <title>Class Alchemy New User</title>
     {% endblock html-head %}
-    {% block h1 %}Create an Account{% endblock h1 %}
+    {% block h1 %}<h1>Create an Account</h1>{% endblock h1 %}
 
 {% block content %}
 <form method="post">
@@ -21,7 +21,6 @@
         <label for="{{ form.password2.id_for_label }}">Password - *This Must Be Left Blank</label>
         <p>{{ form.password2 }}</p>
     </div>
-    <button type='submit'>Create</submit>
+    <button type="submit" class="button green">Create</button>
 </form>
 {% endblock content %}
-

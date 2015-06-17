@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="user"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Change User Name</title>
+    {% endblock html-head %}
+    {% block h1 %}<h1>Edit Account</h1>{% endblock h1 %}
+
+{% block content %}
+<form method="post">
+    {{ form.non_field_errors }}
+    {% csrf_token %}
+    <div class="fieldWrapper">
+        {{ form.username.errors }}
+        <label for="{{ form.username.id_for_label }}">Username</label>
+       <p> {{ form.username }}</p>
+    </div>
+    <button type="submit" class="button blue">Change</button>
+</form>
+{% endblock content %}

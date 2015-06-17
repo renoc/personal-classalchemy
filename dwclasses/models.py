@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
+
+from config.models import ManagerMixin
 from combinedchoices.models import (
     BaseCCObj, BaseChoice, CompletedCombinedObj, ReadyCombinedObj)
 
@@ -34,8 +36,8 @@ class CombinedClass(ReadyCombinedObj):
             return '%s - %s' % (self.user.username, self.form_name)
 
 
-class CompendiumClassManager(models.QuerySet):
-    def get_list(self, user):
+class CompendiumClassManager(ManagerMixin, models.QuerySet):
+    def get_user_classes(self, user):
         return self.filter(user=user)
 
 

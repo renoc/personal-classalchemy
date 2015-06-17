@@ -5,15 +5,20 @@
         <meta name="robots" content="noindex">
         <title>Compendium Classes</title>
     {% endblock html-head %}
-    {% block h1 %}Your Compendium Classes{% endblock h1 %}
+    {% block h1 %}<h1>Your Compendium Classes</h1>{% endblock h1 %}
 
 {% block content %}
 {% if object_list.exists %}
     {% for compendiumclass in object_list %}
-        {{ compendiumclass.name }}
+        <div>
+            <a href="/compendiumclasses/{{ compendiumclass.id }}" class="button blue">Edit</a>
+            {{ compendiumclass.name }}
+        </div>
     {% endfor %}
 {% else %}
     <p>You have no classes saved.</p>
 {% endif %}
+    <p>
+        <a href="/compendiumclasses/create" class="button green">Create New Compendium Class</a>
+    </p>
 {% endblock content %}
-

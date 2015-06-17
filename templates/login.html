@@ -5,7 +5,7 @@
         <link rel="canonical" href="https://classalchemy.pythonanywhere.com/login" />
         <title>Class Alchemy Access Point</title>
     {% endblock html-head %}
-    {% block h1 %}Tune In/ Turn On{% endblock h1 %}
+    {% block h1 %}<h1>Tune In/ Turn On</h1>{% endblock h1 %}
 
 {% block content %}
 <form method="post">
@@ -17,7 +17,6 @@
         {{ form.username }}
     </div>
     {{ form.password.errors }}
-    <button type='submit'>Login</submit>
+    <button type="submit" class="button blue">Login</submit>
 </form>
 {% endblock content %}
-
