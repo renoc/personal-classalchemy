@@ -9,19 +9,19 @@
 </head><body>
 
 <div class="header">
-    <h2 class="hpad"><a href="/" class="main">Class Alchemy</a></h2>
-    <a href="/about" class="about">About</a>
+    <h2><a href="/" id="h2a" class="main">Class Alchemy</a></h2>
+    <span><a href="/about" class="about">About</a></span>
 {% if user.is_authenticated %}
-    <a href="/compendiumclasses/" class="compendium" rel="nofollow">Compendium Classes</a>
-    <a href="/logout">Logout</a>
-    <span>
-        <a href="/account/" class="user">User</a>
+    <span><a href="/compendiumclasses/" class="compendium" rel="nofollow">Compendium Classes</a></span>
+    <span><a href="/logout">Logout</a></span>
+    <span id="userbox">
+        <a href="/account/" id="userlink">User</a>
         <input type="text" id="username_display" value="{{ user.get_username }}" readonly />
     </span>
 {% else %}
-    <a href="/create_user" class="create_user">Create User</a>
-    <a href="/login" class="login">Login</a>
-    <span>No User <input type="text" id="username_display" value="" readonly /></span>
+    <span><a href="/create_user" class="create_user">Create User</a></span>
+    <span><a href="/login" class="login"><span>Login</span></a></span>
+    <span id="userbox"><span id="userlink">No User</span> <input type="text" id="username_display" value="" readonly /></span>
 {% endif %}
 </div>
 {% block h1 %}<h1>Hello Dungeon World</h1>{% endblock h1 %}
