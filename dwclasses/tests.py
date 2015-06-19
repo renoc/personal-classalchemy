@@ -1,3 +1,4 @@
+from combinedchoices.models import ChoiceField
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -72,6 +73,17 @@ class CompendiumClass_ModelTests(TestCase):
         self.assertEqual(
             mod, CompendiumClass.objects.get_user_classes(user=user).get())
 
+    def test_unlinked_choices(self):
+        user = mommy.make(User, username='testuser')
+        tested = mommy.make(CompendiumClass, form_name='tested', user=user)
+        untested = mommy.make(CompendiumClass, form_name='untested', user=user)
+        modin = mommy.make(ClassChoice, field_name='in', user=user)
+        modout = mommy.make(ClassChoice, field_name='out', user=user)
+        modother = mommy.make(ClassChoice, field_name='other')
+        mommy.make(ChoiceField, base_ccobj=tested, base_choice=modin)
+        mommy.make(ChoiceField, base_ccobj=untested, base_choice=modout)
+        self.assertEqual(tested.available_choices().get(), modout)
+
 
 class View_Tests(TestCase):
     def setUp(self):
@@ -129,7 +141,7 @@ class View_Tests(TestCase):
         request.user = user
         view = EditCompendiumClassView()
         view.request = request
-        view.kwargs = {'id': 0}
+        view.kwargs = {'cc_id': 0}
 
         self.moxx.StubOutWithMock(CompendiumClassManager, 'get_or_404')
         CompendiumClassManager.get_or_404(id=0, user=user).AndReturn(None)

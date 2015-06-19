@@ -24,6 +24,13 @@
     <span id="userbox"><span id="userlink">No User</span> <input type="text" id="username_display" value="" readonly /></span>
 {% endif %}
 </div>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% block h1 %}<h1>Hello Dungeon World</h1>{% endblock h1 %}
 {% block content %}
 {% endblock content %}

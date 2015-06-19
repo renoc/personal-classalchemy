@@ -22,17 +22,32 @@ h1 {
     padding: 0.2em 1em;
 }
 h2 { font-size: x-large; }
+h3 { font-size: large; }
+input { font-size: 1em; }
 ul { margin-top: 0px; }
+label { display: block; }
 .errorlist { background: #F9C; }
 
+.blackbar {
+    background-color: #000;
+    color: #FFF;
+    padding: 0.5em 1em;
+}
+.blackbar>h2 {
+    font-family: Georgia, serif;
+    font-variant: small-caps;
+    margin: 0;
+    padding: 0;
+}
+.blackbar .button {
+    margin: -0.2em;
+}
 .header {
     color: #FFF;
     font-family: Georgia, serif;
     font-variant: small-caps;
 }
-.header h2 {
-    margin: 0em;
-}
+.header h2 { margin: 0em; }
 #h2a {
     padding: 0em 2em 0em 1.5em;
     vertical-align: initial;
@@ -82,9 +97,10 @@ ul { margin-top: 0px; }
 
 .button {
     border-radius: 12px;
-    border-size: 3px;
     border-style: solid;
+    border-width: 3px;
     display: inline-block;
+    font-size: 1em;
     margin: 2px 0px;
     padding: 6px;
     text-decoration: None
@@ -97,5 +113,10 @@ ul { margin-top: 0px; }
 .blue {
     background: #66F;
     border-color: #009;
+    color: #FFF;
+}
+.red {
+    background: #F66;
+    border-color: #900;
     color: #FFF;
 }

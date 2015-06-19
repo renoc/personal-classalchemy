@@ -5,7 +5,7 @@
         <meta name="robots" content="noindex">
         <title>Compendium Class Edit Page</title>
     {% endblock html-head %}
-    {% block h1 %}<h1>Customize Compendium Class</h1>{% endblock h1 %}
+    {% block h1 %}<h1>Customize {{ object.form_name }}</h1>{% endblock h1 %}
 
 {% block content %}
 <form method="post">
@@ -16,8 +16,35 @@
        <p> {{ form.form_name }}</p>
     </div>
     <p>
-    <button type='submit' class="button blue">Update</button>
+        <button type='submit' class="button blue">Update</button>
     </p>
 </form>
+{% for section in compendium_class.base_choices %}
+<div>
+    <div class="blackbar">
+        <a href="/compendiumclasses/{{ compendium_class.id }}/remove_section/{{ section.id }}"
+            class="align-right button red">Remove</a>
+        <h2 class="blackbar">{{ section.field_name }}</h2>
+    </div>
+    <p>{{ section.instructions }}</p>
+    <a href="/compendiumclasses/{{ compendium_class.id }}/edit_section/{{ section.id }}"
+        class="align-right button blue">Edit {{ section.field_name }}</a>
+    <div>{% if not section.cross_combine %}Do Not {% endif %}Cross Combine</div>
+    <div>Field Type: {{ section.choice_type }}</div>
+    <div>Selections: {{ section.min_selects }}-{{ section.max_selects }}</div>
+</div>
+{% endfor %}
+<hr />
+<form method="post" action="/compendiumclasses/{{ compendium_class.id }}/link_section">
+    {% csrf_token %}
+    <select id="sec_id" name="sec_id">
+        <option value="" selected="selected">---------</option>
+    {% for section in compendium_class.available_choices %}
+        <option value="{{ section.id }}">{{ section.field_name }}</option>
+    {% endfor %}
+    </select>
+    <button type='submit' class="button green">Add Existing Section</button>
+</form>
+<hr />
+<a href="/compendiumclasses/{{ object.id }}/create_section" class="button green">Create New Class Section</a>
 {% endblock content %}
-

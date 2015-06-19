@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="compendium"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Edit Class Section</title>
+    {% endblock html-head %}
+    {% block h1 %}<h1>Edit Class Section</h1>{% endblock h1 %}
+
+{% block content %}
+<p>
+Used in classes:
+{% for comp in object.baseccobj_set.all %}
+    <b>{{ comp.form_name }}{% if not forloop.last %},{% endif %}</b>
+{% endfor %}
+</p>
+<div>
+    <a href="/compendiumclasses/{{ compendium_class.id }}"
+        class="button blue">Return to {{ compendium_class.name }}</a>
+    </p>
+</div>
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <p>
+    <button type='submit' class="button blue">Edit</button>
+</form>
+{% endblock content %}

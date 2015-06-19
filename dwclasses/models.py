@@ -7,8 +7,13 @@ from combinedchoices.models import (
     BaseCCObj, BaseChoice, CompletedCombinedObj, ReadyCombinedObj)
 
 
+class ClassChoiceManager(ManagerMixin, models.QuerySet):
+    pass
+
+
 class ClassChoice(BaseChoice):
     user = models.ForeignKey(User, null=True, blank=True)
+    objects = ClassChoiceManager.as_manager()
 
     def validate_unique(self, exclude=None):
         # Call parent class to bypass override on parent class
@@ -54,6 +59,10 @@ class CompendiumClass(BaseCCObj):
     @property
     def name(self):
         return self.form_name
+
+    def available_choices(self):
+        return ClassChoice.objects.filter(
+            user=self.user).exclude(baseccobj=self)
 
 
 class CompletedCharacter(CompletedCombinedObj):

@@ -8,13 +8,12 @@
     {% block h1 %}<h1>Create New Compendium Class</h1>{% endblock h1 %}
 
 {% block content %}
+<div>
+    <h3>{{ compendium_class }}</h3>
+</div>
 <form method="post">
     {% csrf_token %}
-    <div class="fieldWrapper">
-        {{ form.form_name.errors }}
-        <label for="{{ form.form_name.id_for_label }}">Class Name</label>
-        <p> {{ form.form_name }}</p>
-    </div>
+    {{ form }}
     <p>
     <button type='submit' class="button green">Create</button>
     </p>
