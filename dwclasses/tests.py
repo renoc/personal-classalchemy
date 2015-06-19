@@ -3,23 +3,25 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.test.client import RequestFactory
+from django.views.generic.edit import CreateView, FormMixin, UpdateView
 from django.views.generic.list import ListView
 from model_mommy import mommy
 import mox
 
-from dwclasses.forms import CompendiumClassForm
+from dwclasses.forms import CompendiumClassForm, SectionForm
 from dwclasses.models import (
-    ClassChoice, CombinedClass, CompendiumClassManager, CompendiumClass,
-    CompletedCharacter)
+    CombinedClass, CompendiumClassManager, CompendiumClass,
+    CompletedCharacter, SectionManager, Section)
 from dwclasses.views import (
-    CreateCompendiumClassView, EditCompendiumClassView,
-    ListCompendiumClassesView)
+    ListCompendiumClassesView, CreateCompendiumClassView,
+    EditCompendiumClassView,
+    CreateSectionView, EditSectionView, RemoveSectionView, LinkSectionView)
 
 
 class Unicode_Tests(TestCase):
 
-    def test_ClassChoice(self):
-        mod = ClassChoice(field_name='testuni')
+    def test_Section(self):
+        mod = Section(field_name='testuni')
         self.assertEqual('testuni', '%s' % mod)
         mod.user = mommy.make(User, username='testuser')
         self.assertEqual('testuser - testuni', '%s' % mod)
@@ -43,18 +45,18 @@ class Unicode_Tests(TestCase):
         self.assertEqual('testuser - testuni', '%s' % mod)
 
 
-class ClassChoice_ModelTests(TestCase):
+class Section_ModelTests(TestCase):
 
     def test_validate_pass(self):
-        mod = mommy.make(ClassChoice, field_name='testuni')
+        mod = mommy.make(Section, field_name='testuni')
         mod.save()
         mod.validate_unique()
         #No errors raised
 
     def test_validate_fail(self):
-        mod = mommy.make(ClassChoice, field_name='testuni')
+        mod = mommy.make(Section, field_name='testuni')
         mod.save()
-        mod = mommy.make(ClassChoice, field_name='testuni')
+        mod = mommy.make(Section, field_name='testuni')
         self.assertRaises(ValidationError, mod.validate_unique())
 
 
@@ -77,15 +79,15 @@ class CompendiumClass_ModelTests(TestCase):
         user = mommy.make(User, username='testuser')
         tested = mommy.make(CompendiumClass, form_name='tested', user=user)
         untested = mommy.make(CompendiumClass, form_name='untested', user=user)
-        modin = mommy.make(ClassChoice, field_name='in', user=user)
-        modout = mommy.make(ClassChoice, field_name='out', user=user)
-        modother = mommy.make(ClassChoice, field_name='other')
+        modin = mommy.make(Section, field_name='in', user=user)
+        modout = mommy.make(Section, field_name='out', user=user)
+        modother = mommy.make(Section, field_name='other')
         mommy.make(ChoiceField, base_ccobj=tested, base_choice=modin)
         mommy.make(ChoiceField, base_ccobj=untested, base_choice=modout)
-        self.assertEqual(tested.available_choices().get(), modout)
+        self.assertEqual(tested.available_sections().get(), modout)
 
 
-class View_Tests(TestCase):
+class Compendium_View_Tests(TestCase):
     def setUp(self):
         self.moxx = mox.Mox()
 
@@ -156,3 +158,187 @@ class View_Tests(TestCase):
         view = EditCompendiumClassView()
         view.object = CompendiumClass(form_name='testcc', id=99)
         self.assertTrue(view.get_success_url(), "/compendiumclasses/99")
+
+
+class Section_View_Tests(TestCase):
+
+    def setUp(self):
+        self.moxx = mox.Mox()
+
+    def tearDown(self):
+        self.moxx.UnsetStubs()
+
+    def test_mixin_get_context(self):
+        view = EditSectionView()
+
+        self.moxx.StubOutWithMock(FormMixin, 'get_context_data')
+        FormMixin.get_context_data().AndReturn({})
+        self.moxx.StubOutWithMock(EditSectionView, 'get_compendium_class')
+        EditSectionView.get_compendium_class().AndReturn('foo')
+
+        self.moxx.ReplayAll()
+        context = view.get_context_data()
+        self.moxx.VerifyAll()
+
+        self.assertEqual(context['compendium_class'], 'foo')
+
+    def test_mixin_get_compendium_class(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = EditSectionView()
+        view.request = request
+        view.kwargs = {'cc_id': 0}
+
+        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_or_404')
+        CompendiumClassManager.get_or_404(id=0, user=user).AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_compendium_class()
+        self.moxx.VerifyAll()
+
+        # all mocked functions called
+
+    def test_mixin_get_section(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = EditSectionView()
+        view.request = request
+        view.kwargs = {'sec_id': 0}
+
+        self.moxx.StubOutWithMock(SectionManager, 'get_or_404')
+        SectionManager.get_or_404(id=0, user=user).AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_section()
+        self.moxx.VerifyAll()
+
+        # all mocked functions called
+
+    def test_create_section_success_url(self):
+        view = CreateSectionView()
+        view.object = mommy.make(Section, id=99)
+        view.kwargs = {'cc_id': 0}
+
+        self.moxx.StubOutWithMock(CreateView, 'get_success_url')
+        CreateView.get_success_url().AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_success_url()
+        self.moxx.VerifyAll()
+
+        self.assertTrue(
+            view.success_url, "/compendiumclasses/0/edit_section/99")
+
+    def test_create_section_valid(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = CreateSectionView()
+        view.request = request
+        form = SectionForm()
+        comp = mommy.make(CompendiumClass)
+        sec = Section(field_type=0)
+
+        self.moxx.StubOutWithMock(CreateSectionView, 'get_compendium_class')
+        CreateSectionView.get_compendium_class().AndReturn(comp)
+        self.moxx.StubOutWithMock(SectionForm, 'save')
+        SectionForm.save(commit=False).AndReturn(sec)
+        self.moxx.StubOutWithMock(CreateSectionView, 'get_success_url')
+        CreateSectionView.get_success_url().AndReturn(None)
+
+        self.assertFalse(ChoiceField.objects.all().exists())
+
+        self.moxx.ReplayAll()
+        view.form_valid(form=form)
+        self.moxx.VerifyAll()
+
+        self.assertTrue(ChoiceField.objects.all().exists())
+
+    def test_edit_section_get_object(self):
+        view = EditSectionView()
+
+        self.moxx.StubOutWithMock(EditSectionView, 'get_section')
+        EditSectionView.get_section().AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_object()
+        self.moxx.VerifyAll()
+
+        # all mocked functions called
+
+    def test_edit_section_success_url(self):
+        request = RequestFactory()
+        view = EditSectionView()
+        view.request = request
+        view.kwargs = {'cc_id': 0}
+        sec = mommy.make(Section)
+        view.object = sec
+
+        self.moxx.StubOutWithMock(UpdateView, 'get_success_url')
+        UpdateView.get_success_url().AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_success_url()
+        self.moxx.VerifyAll()
+
+        # all mocked functions called
+
+    def test_remove_section(self):
+        request = RequestFactory()
+        view = RemoveSectionView()
+        view.request = request
+        comp = mommy.make(CompendiumClass)
+        sec = mommy.make(Section)
+        ChoiceField.objects.create(base_ccobj=comp, base_choice=sec)
+
+        self.assertTrue(ChoiceField.objects.all().exists())
+
+        self.moxx.StubOutWithMock(RemoveSectionView, 'get_compendium_class')
+        RemoveSectionView.get_compendium_class().AndReturn(comp)
+        self.moxx.StubOutWithMock(RemoveSectionView, 'get_section')
+        RemoveSectionView.get_section().AndReturn(sec)
+
+        self.moxx.ReplayAll()
+        view.get_redirect_url()
+        self.moxx.VerifyAll()
+
+        self.assertFalse(ChoiceField.objects.all().exists())
+
+    def test_linksection_getsection(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.POST = {'sec_id': 0}
+        request.user = user
+        view = LinkSectionView()
+        view.request = request
+
+        self.moxx.StubOutWithMock(SectionManager, 'get_or_404')
+        SectionManager.get_or_404(id=0, user=user).AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_section()
+        self.moxx.VerifyAll()
+
+        # all mocked functions called
+
+    def test_link_existing_section(self):
+        request = RequestFactory()
+        view = LinkSectionView()
+        view.request = request
+        comp = mommy.make(CompendiumClass)
+        sec = mommy.make(Section)
+
+        self.assertFalse(ChoiceField.objects.all().exists())
+
+        self.moxx.StubOutWithMock(LinkSectionView, 'get_compendium_class')
+        LinkSectionView.get_compendium_class().AndReturn(comp)
+        self.moxx.StubOutWithMock(LinkSectionView, 'get_section')
+        LinkSectionView.get_section().AndReturn(sec)
+
+        self.moxx.ReplayAll()
+        view.get_redirect_url()
+        self.moxx.VerifyAll()
+
+        self.assertTrue(ChoiceField.objects.all().exists())

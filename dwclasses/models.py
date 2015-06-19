@@ -7,18 +7,18 @@ from combinedchoices.models import (
     BaseCCObj, BaseChoice, CompletedCombinedObj, ReadyCombinedObj)
 
 
-class ClassChoiceManager(ManagerMixin, models.QuerySet):
+class SectionManager(ManagerMixin, models.QuerySet):
     pass
 
 
-class ClassChoice(BaseChoice):
+class Section(BaseChoice):
     user = models.ForeignKey(User, null=True, blank=True)
-    objects = ClassChoiceManager.as_manager()
+    objects = SectionManager.as_manager()
 
     def validate_unique(self, exclude=None):
         # Call parent class to bypass override on parent class
         super(BaseChoice, self).validate_unique(exclude=exclude)
-        duplicates = ClassChoice.objects.exclude(id=self.id).filter(
+        duplicates = Section.objects.exclude(id=self.id).filter(
             field_name=self.field_name, user=self.user)
         if duplicates.exists():
             ValidationError(('Non-Unique Name Error'),
@@ -26,7 +26,7 @@ class ClassChoice(BaseChoice):
 
     def __unicode__(self):
         if not self.user:
-            return super(ClassChoice, self).__unicode__()
+            return super(Section, self).__unicode__()
         else:
             return '%s - %s' % (self.user.username, self.field_name)
 
@@ -60,8 +60,8 @@ class CompendiumClass(BaseCCObj):
     def name(self):
         return self.form_name
 
-    def available_choices(self):
-        return ClassChoice.objects.filter(
+    def available_sections(self):
+        return Section.objects.filter(
             user=self.user).exclude(baseccobj=self)
 
 

@@ -1,6 +1,6 @@
 from django.forms.models import ModelForm
 
-from dwclasses.models import CompendiumClass, ClassChoice
+from dwclasses.models import CompendiumClass, Section
 
 
 class CompendiumClassForm(ModelForm):
@@ -9,7 +9,7 @@ class CompendiumClassForm(ModelForm):
         fields = ('form_name',)
 
 
-class ClassSectionForm(ModelForm):
+class SectionForm(ModelForm):
     class Meta:
-        model = ClassChoice
+        model = Section
         exclude = ('user',)

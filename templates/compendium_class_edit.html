@@ -39,7 +39,7 @@
     {% csrf_token %}
     <select id="sec_id" name="sec_id">
         <option value="" selected="selected">---------</option>
-    {% for section in compendium_class.available_choices %}
+    {% for section in compendium_class.available_sections %}
         <option value="{{ section.id }}">{{ section.field_name }}</option>
     {% endfor %}
     </select>

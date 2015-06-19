@@ -5,8 +5,8 @@ from django.views.generic.base import RedirectView
 from django.views.generic.edit import CreateView, ModelFormMixin, UpdateView
 from django.views.generic.list import ListView
 
-from dwclasses.forms import ClassSectionForm, CompendiumClassForm
-from dwclasses.models import CompendiumClass, ClassChoice
+from dwclasses.forms import SectionForm, CompendiumClassForm
+from dwclasses.models import CompendiumClass, Section
 from nav.models import LoginRequiredMixin
 
 
@@ -21,9 +21,9 @@ class SectionMixin(object):
         id = self.kwargs.get('cc_id')
         return CompendiumClass.objects.get_or_404(id=id, user=self.request.user)
 
-    def get_class_section(self):
+    def get_section(self):
         id = self.kwargs.get('sec_id')
-        return ClassChoice.objects.get_or_404(id=id, user=self.request.user)
+        return Section.objects.get_or_404(id=id, user=self.request.user)
 
 
 class ListCompendiumClassesView(LoginRequiredMixin, ListView):
@@ -66,15 +66,15 @@ class EditCompendiumClassView(LoginRequiredMixin, SectionMixin, UpdateView):
         return super(EditCompendiumClassView, self).get_success_url()
 
 
-class CreateClassSectionView(LoginRequiredMixin, SectionMixin, CreateView):
-    form_class = ClassSectionForm
+class CreateSectionView(LoginRequiredMixin, SectionMixin, CreateView):
+    form_class = SectionForm
     template_name = "section_create.html"
 
     def get_success_url(self):
-        id = self.object.id
-        id = self.kwargs.get('cc_id')  # hold until edit ready
-        self.success_url = "/compendiumclasses/%s" % id
-        return super(CreateClassSectionView, self).get_success_url()
+        id = self.kwargs.get('cc_id')
+        self.success_url = "/compendiumclasses/%s/edit_section/%s" % (
+            id, self.object.id)
+        return super(CreateSectionView, self).get_success_url()
 
     def form_valid(self, form):
         compendium_class = self.get_compendium_class()
@@ -87,39 +87,39 @@ class CreateClassSectionView(LoginRequiredMixin, SectionMixin, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class EditClassSectionView(LoginRequiredMixin, SectionMixin, UpdateView):
-    form_class = ClassSectionForm
+class EditSectionView(LoginRequiredMixin, SectionMixin, UpdateView):
+    form_class = SectionForm
     template_name = "section_edit.html"
 
     def get_object(self):
-        return self.get_class_section()
+        return self.get_section()
 
     def get_success_url(self):
         id = self.kwargs.get('cc_id')
         self.success_url = "/compendiumclasses/%s/edit_section/%s" % (
             id, self.object.id)
-        return super(EditClassSectionView, self).get_success_url()
+        return super(EditSectionView, self).get_success_url()
 
 
-class RemoveClassSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
+class RemoveSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
     permanent = False
 
     def get_redirect_url(self, *args, **kwargs):
         comp = self.get_compendium_class()
-        sect = self.get_class_section()
+        sect = self.get_section()
         ChoiceField.objects.get(base_ccobj=comp, base_choice=sect).delete()
         return "/compendiumclasses/%s" % comp.id
 
 
-class LinkClassSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
+class LinkSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
     permanent = False
 
-    def get_class_section(self):
-        id = self.request.POST.get('sec_id')
-        return ClassChoice.objects.get_or_404(id=id, user=self.request.user)
+    def get_section(self):
+        id = self.request.POST.get('sec_id') or 0
+        return Section.objects.get_or_404(id=id, user=self.request.user)
 
     def get_redirect_url(self, *args, **kwargs):
         comp = self.get_compendium_class()
-        sect = self.get_class_section()
+        sect = self.get_section()
         ChoiceField.objects.create(base_ccobj=comp, base_choice=sect)
         return "/compendiumclasses/%s" % comp.id
