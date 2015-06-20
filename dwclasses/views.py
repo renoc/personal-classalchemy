@@ -7,8 +7,9 @@ from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 
 from dwclasses.forms import (
-    ChoiceForm, ChoiceSectionForm, CompendiumClassForm, SectionForm)
-from dwclasses.models import CompendiumClass, Section
+    ChoiceForm, ChoiceSectionForm, CombineForm, CompendiumClassForm,
+    SectionForm)
+from dwclasses.models import CompendiumClass, Section, CombinedClass
 from nav.models import LoginRequiredMixin
 
 
@@ -33,7 +34,7 @@ class ListCompendiumClassesView(LoginRequiredMixin, ListView):
     template_name = "compendium_class_list.html"
 
     def get_queryset(self):
-        self.queryset = CompendiumClass.objects.get_user_classes(
+        self.queryset = CompendiumClass.objects.get_user_objects(
             user=self.request.user)
         return super(ListCompendiumClassesView, self).get_queryset()
 
@@ -143,3 +144,47 @@ class LinkSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
         sect = self.get_section()
         ChoiceField.objects.create(base_ccobj=comp, base_choice=sect)
         return "/compendiumclasses/%s" % comp.id
+
+
+class ListCombinedClassesView(LoginRequiredMixin, ListView):
+    model = CombinedClass
+    template_name = "combined_class_list.html"
+
+    def get_queryset(self):
+        self.queryset = CombinedClass.objects.get_user_objects(
+            user=self.request.user)
+        return super(ListCombinedClassesView, self).get_queryset()
+
+
+class CombinedMixin(object):
+    form_class = CombineForm
+
+    def get_form_kwargs(self):
+        kwargs = super(CombinedMixin, self).get_form_kwargs()
+        kwargs['user_compendiums'] = CompendiumClass.objects.get_user_objects(
+            user=self.request.user)
+        return kwargs
+
+    def get_success_url(self):
+        self.success_url = "/combinedclasses/%s/edit" % self.object.id
+        return super(CombinedMixin, self).get_success_url()
+
+
+class CreateCombinedClassView(LoginRequiredMixin, CombinedMixin, CreateView):
+    template_name = "combined_class_create.html"
+
+    def form_valid(self, form):
+        new_obj = form.save(commit=False)
+        new_obj.user = user=self.request.user
+        new_obj.save()
+        form.save_m2m()
+        self.object = new_obj
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class EditCombinedClassView(LoginRequiredMixin, CombinedMixin, UpdateView):
+    template_name = "combined_class_create.html"
+
+    def get_object(self):
+        id = self.kwargs.get('id')
+        return CombinedClass.objects.get_or_404(id=id, user=self.request.user)

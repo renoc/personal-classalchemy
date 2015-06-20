@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="combined"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Create New Combined Class</title>
+    {% endblock html-head %}
+    {% block h1 %}<h1>Create New Combined Class</h1>{% endblock h1 %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <p>
+    {% if form.instance.id %}
+        <button type='submit' class="button blue">Update</button>
+    {% else %}
+        <button type='submit' class="button green">Create</button>
+    {% endif %}
+    </p>
+</form>
+{% endblock content %}

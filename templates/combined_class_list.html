@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="combined"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Combined Classes</title>
+    {% endblock html-head %}
+    {% block h1 %}<h1>Your Combined Classes</h1>{% endblock h1 %}
+
+{% block content %}
+{% if object_list.exists %}
+    {% for combinedclass in object_list %}
+<div class="compendium-section">
+    <span class="half-width">
+        <h3>{{ combinedclass.name }}</h3>
+        <a href="/combinedclasses/{{ combinedclass.id }}/edit" class="button blue">Edit</a>
+    </span>
+    <span class="half-width align-right">
+        <ul>
+        {% for compendium_class in combinedclass.included_forms.all %}
+            <li>{{ compendium_class.form_name }}</li>
+        {% endfor %}
+        </ul>
+    </span>
+</div>
+<hr />
+    {% endfor %}
+{% else %}
+    <p>You have no classes saved.</p>
+{% endif %}
+    <p>
+        <a href="/combinedclasses/create" class="button green">Create New Combined Class</a>
+    </p>
+{% endblock content %}

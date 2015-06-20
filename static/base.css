@@ -1,4 +1,4 @@
-.main .main, .about .about, .create_user .create_user, .login .login, .compendium .compendium, .user .user {
+.main .main, .about .about, .create_user .create_user, .login .login, .compendium .compendium, .combined .combined, .user .user {
     color: #FC9;
 }
 
@@ -28,7 +28,7 @@ h2 { font-size: x-large; }
 h3 { font-size: large; }
 input { font-size: 1em; }
 ul {
-    margin-top: 0px;
+    margin: 0px auto;
     padding-left: 1.5em;
  }
 label { display: block; }

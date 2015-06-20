@@ -69,13 +69,18 @@ class CompendiumClass_ModelTests(TestCase):
         mod = CompendiumClass(form_name=testname)
         self.assertEqual(mod.name, testname)
 
+    def test_name_property_combined(self):
+        testname = 'testname'
+        mod = CombinedClass(form_name=testname)
+        self.assertEqual(mod.name, testname)
+
     def test_get_user_classes(self):
         user = User(username='testuser')
         user.save()
         mod = CompendiumClass(form_name='testuni', user=user)
         mod.save()
         self.assertEqual(
-            mod, CompendiumClass.objects.get_user_classes(user=user).get())
+            mod, CompendiumClass.objects.get_user_objects(user=user).get())
 
     def test_unlinked_choices(self):
         user = mommy.make(User, username='testuser')
@@ -103,8 +108,8 @@ class Compendium_View_Tests(TestCase):
         view = ListCompendiumClassesView()
         view.request = request
 
-        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_user_classes')
-        CompendiumClassManager.get_user_classes(user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_user_objects')
+        CompendiumClassManager.get_user_objects(user=user).AndReturn(None)
         self.moxx.StubOutWithMock(ListView, 'get_queryset')
         ListView.get_queryset().AndReturn(None)
 
@@ -393,3 +398,15 @@ class Section_View_Tests(TestCase):
         self.moxx.VerifyAll()
 
         self.assertTrue(ChoiceField.objects.all().exists())
+
+
+class Combined_View_Tests(TestCase):
+
+    def setUp(self):
+        self.moxx = mox.Mox()
+
+    def tearDown(self):
+        self.moxx.UnsetStubs()
+
+    def test_edit_get_object(self):
+        pass

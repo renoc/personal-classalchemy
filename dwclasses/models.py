@@ -31,8 +31,13 @@ class Section(BaseChoice):
             return '%s - %s' % (self.user.username, self.field_name)
 
 
+class CombinedClassManager(ManagerMixin, models.QuerySet):
+    pass
+
+
 class CombinedClass(ReadyCombinedObj):
     user = models.ForeignKey(User, null=True, blank=True)
+    objects = CombinedClassManager.as_manager()
 
     def __unicode__(self):
         if not self.user:
@@ -40,10 +45,13 @@ class CombinedClass(ReadyCombinedObj):
         else:
             return '%s - %s' % (self.user.username, self.form_name)
 
+    @property
+    def name(self):
+        return self.form_name
+
 
 class CompendiumClassManager(ManagerMixin, models.QuerySet):
-    def get_user_classes(self, user):
-        return self.filter(user=user)
+    pass
 
 
 class CompendiumClass(BaseCCObj):
