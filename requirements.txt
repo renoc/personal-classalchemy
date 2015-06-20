@@ -1,3 +1,4 @@
+django-extra-views
 jsonfield
 model-mommy
 mox

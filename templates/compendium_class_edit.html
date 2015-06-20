@@ -16,25 +16,10 @@
        <p> {{ form.form_name }}</p>
     </div>
     <p>
-        <button type='submit' class="button blue">Update</button>
+        <button type='submit' class="button blue">Change Name</button>
     </p>
 </form>
-{% for section in compendium_class.base_choices %}
-<div>
-    <div class="blackbar">
-        <a href="/compendiumclasses/{{ compendium_class.id }}/remove_section/{{ section.id }}"
-            class="align-right button red">Remove</a>
-        <h2 class="blackbar">{{ section.field_name }}</h2>
-    </div>
-    <p>{{ section.instructions }}</p>
-    <a href="/compendiumclasses/{{ compendium_class.id }}/edit_section/{{ section.id }}"
-        class="align-right button blue">Edit {{ section.field_name }}</a>
-    <div>{% if not section.cross_combine %}Do Not {% endif %}Cross Combine</div>
-    <div>Field Type: {{ section.choice_type }}</div>
-    <div>Selections: {{ section.min_selects }}-{{ section.max_selects }}</div>
-</div>
-{% endfor %}
-<hr />
+
 <form method="post" action="/compendiumclasses/{{ compendium_class.id }}/link_section">
     {% csrf_token %}
     <select id="sec_id" name="sec_id">
@@ -46,5 +31,34 @@
     <button type='submit' class="button green">Add Existing Section</button>
 </form>
 <hr />
+
+{% for choice_field in compendium_class.choicefield_set.all %}
+    <div class="compendium-section">
+        <span class="half-width">
+        {% with choice_field.base_choice as section %}
+            <div class="blackbar">
+                <a href="/compendiumclasses/{{ compendium_class.id }}/remove_section/{{ section.id }}"
+                    class="align-right button red">Remove</a>
+                <h2 class="blackbar">{{ section.field_name }}</h2>
+            </div>
+            <p>{{ section.instructions }}</p>
+            <a href="/compendiumclasses/{{ compendium_class.id }}/edit_section/{{ section.id }}"
+                class="align-right button blue">Edit {{ section.field_name }}</a>
+            <div>{% if not section.cross_combine %}Do Not {% endif %}Cross Combine</div>
+            <div>Field Type: {{ section.choice_type }}</div>
+            <div>Selections: {{ section.min_selects }}-{{ section.max_selects }}</div>
+        {% endwith %}
+        </span>
+        <span class="half-width">
+            <ul>
+            {% for choice in choice_field.choice_set.all %}
+                <li>{{ choice.text }}</li>
+            {% endfor %}
+            </ul>
+        </span>
+    </div>
+    <hr />
+{% endfor %}
+
 <a href="/compendiumclasses/{{ object.id }}/create_section" class="button green">Create New Class Section</a>
 {% endblock content %}

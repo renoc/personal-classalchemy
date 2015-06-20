@@ -8,9 +8,12 @@
     padding: 0em 1em;
  }
 .dpad { padding: 1em; }
-.align-right { float: right; }
+.align-right { float: right !important; }
 .high-top { margin-top: 40px; }
-body { font-family: Verdana, sans-serif; }
+body {
+    font-family: Verdana, sans-serif;
+    margin: 2px 5px;
+}
 #tricon { margin: -50px 15px -10px -15px; }
 h1 {
     color: #FFF;
@@ -24,7 +27,10 @@ h1 {
 h2 { font-size: x-large; }
 h3 { font-size: large; }
 input { font-size: 1em; }
-ul { margin-top: 0px; }
+ul {
+    margin-top: 0px;
+    padding-left: 1.5em;
+ }
 label { display: block; }
 .errorlist { background: #F9C; }
 
@@ -118,5 +124,20 @@ label { display: block; }
 .red {
     background: #F66;
     border-color: #900;
-    color: #FFF;
+    color: #000;
+}
+.grey {
+    background: #CCC;
+    border-color: #333;
+    color: #000;
+}
+
+.compendium-section {
+    overflow: auto;
+}
+.half-width {
+    float: left;
+    margin: 0;
+    min-width: 310px;
+    width: 50%;
 }

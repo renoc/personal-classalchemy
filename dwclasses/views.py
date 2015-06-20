@@ -1,11 +1,13 @@
-from combinedchoices.models import ChoiceField
+from combinedchoices.models import Choice, ChoiceField
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.generic.base import RedirectView
 from django.views.generic.edit import CreateView, ModelFormMixin, UpdateView
 from django.views.generic.list import ListView
+from extra_views.advanced import UpdateWithInlinesView
 
-from dwclasses.forms import SectionForm, CompendiumClassForm
+from dwclasses.forms import (
+    ChoiceForm, ChoiceSectionForm, CompendiumClassForm, SectionForm)
 from dwclasses.models import CompendiumClass, Section
 from nav.models import LoginRequiredMixin
 
@@ -87,18 +89,36 @@ class CreateSectionView(LoginRequiredMixin, SectionMixin, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class EditSectionView(LoginRequiredMixin, SectionMixin, UpdateView):
-    form_class = SectionForm
+class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
+                            UpdateWithInlinesView):
+    form_class = ChoiceSectionForm
+    inlines = [ChoiceForm]
+    inline_model = Choice
+    model = ChoiceField
     template_name = "section_edit.html"
 
+    def get_form(self, form_class):
+        if not form_class == ChoiceSectionForm:
+            return super(EditSectionInlineView, self).get_form(form_class)
+        kwargs = self.get_form_kwargs()
+        kwargs['instance'] = self.object.base_choice.section
+        return SectionForm(**kwargs)
+
+    def construct_inlines(self):
+        # undo form_valid change
+        self.object = self.get_object()
+        return super(EditSectionInlineView, self).construct_inlines()
+
     def get_object(self):
-        return self.get_section()
+        return ChoiceField.objects.get(
+            base_choice=self.get_section(),
+            base_ccobj=self.get_compendium_class())
 
     def get_success_url(self):
         id = self.kwargs.get('cc_id')
         self.success_url = "/compendiumclasses/%s/edit_section/%s" % (
             id, self.object.id)
-        return super(EditSectionView, self).get_success_url()
+        return super(EditSectionInlineView, self).get_success_url()
 
 
 class RemoveSectionView(LoginRequiredMixin, SectionMixin, RedirectView):

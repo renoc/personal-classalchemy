@@ -5,17 +5,19 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from django.views.generic.edit import CreateView, FormMixin, UpdateView
 from django.views.generic.list import ListView
+from extra_views.advanced import UpdateWithInlinesView
 from model_mommy import mommy
 import mox
 
-from dwclasses.forms import CompendiumClassForm, SectionForm
+from dwclasses.forms import (
+    CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm)
 from dwclasses.models import (
     CombinedClass, CompendiumClassManager, CompendiumClass,
     CompletedCharacter, SectionManager, Section)
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
-    EditCompendiumClassView,
-    CreateSectionView, EditSectionView, RemoveSectionView, LinkSectionView)
+    EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
+    RemoveSectionView, LinkSectionView)
 
 
 class Unicode_Tests(TestCase):
@@ -169,12 +171,12 @@ class Section_View_Tests(TestCase):
         self.moxx.UnsetStubs()
 
     def test_mixin_get_context(self):
-        view = EditSectionView()
+        view = EditSectionInlineView()
 
         self.moxx.StubOutWithMock(FormMixin, 'get_context_data')
         FormMixin.get_context_data().AndReturn({})
-        self.moxx.StubOutWithMock(EditSectionView, 'get_compendium_class')
-        EditSectionView.get_compendium_class().AndReturn('foo')
+        self.moxx.StubOutWithMock(EditSectionInlineView, 'get_compendium_class')
+        EditSectionInlineView.get_compendium_class().AndReturn('foo')
 
         self.moxx.ReplayAll()
         context = view.get_context_data()
@@ -186,7 +188,7 @@ class Section_View_Tests(TestCase):
         user = User.objects.create(username='testuser')
         request = RequestFactory()
         request.user = user
-        view = EditSectionView()
+        view = EditSectionInlineView()
         view.request = request
         view.kwargs = {'cc_id': 0}
 
@@ -203,7 +205,7 @@ class Section_View_Tests(TestCase):
         user = User.objects.create(username='testuser')
         request = RequestFactory()
         request.user = user
-        view = EditSectionView()
+        view = EditSectionInlineView()
         view.request = request
         view.kwargs = {'sec_id': 0}
 
@@ -256,28 +258,77 @@ class Section_View_Tests(TestCase):
 
         self.assertTrue(ChoiceField.objects.all().exists())
 
-    def test_edit_section_get_object(self):
-        view = EditSectionView()
+    def test_edit_section_get_form_subforms(self):
+        view = EditSectionInlineView()
 
-        self.moxx.StubOutWithMock(EditSectionView, 'get_section')
-        EditSectionView.get_section().AndReturn(None)
+        self.moxx.StubOutWithMock(EditSectionInlineView, 'get_form_kwargs')
+        self.moxx.StubOutWithMock(UpdateWithInlinesView, 'get_form')
+        UpdateWithInlinesView.get_form(ChoiceForm).AndReturn(None)
 
         self.moxx.ReplayAll()
-        view.get_object()
+        form = view.get_form(ChoiceForm)
+        self.moxx.VerifyAll()
+
+        # proper mocked functions called
+
+    def test_edit_section_get_form_mainform(self):
+        view = EditSectionInlineView()
+        comp = mommy.make(CompendiumClass)
+        sec = mommy.make(Section)
+        choicef = mommy.make(ChoiceField, base_choice=sec, base_ccobj=comp)
+        view.object = choicef
+
+        self.moxx.StubOutWithMock(EditSectionInlineView, 'get_form_kwargs')
+        EditSectionInlineView.get_form_kwargs().AndReturn({})
+        self.moxx.StubOutWithMock(UpdateWithInlinesView, 'get_form')
+
+        self.moxx.ReplayAll()
+        form = view.get_form(ChoiceSectionForm)
+        self.moxx.VerifyAll()
+
+        self.assertEqual(type(form), SectionForm)
+
+    def test_edit_section_reget_object(self):
+        view = EditSectionInlineView()
+
+        self.moxx.StubOutWithMock(EditSectionInlineView, 'get_object')
+        EditSectionInlineView.get_object().AndReturn(None)
+        self.moxx.StubOutWithMock(UpdateWithInlinesView, 'construct_inlines')
+        UpdateWithInlinesView.construct_inlines().AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.construct_inlines()
         self.moxx.VerifyAll()
 
         # all mocked functions called
 
+    def test_edit_section_get_object(self):
+        view = EditSectionInlineView()
+        comp = mommy.make(CompendiumClass)
+        sec = mommy.make(Section)
+        choicef = mommy.make(ChoiceField, base_choice=sec, base_ccobj=comp)
+
+        self.moxx.StubOutWithMock(EditSectionInlineView, 'get_section')
+        EditSectionInlineView.get_section().AndReturn(sec)
+        self.moxx.StubOutWithMock(EditSectionInlineView, 'get_compendium_class')
+        EditSectionInlineView.get_compendium_class().AndReturn(comp)
+
+        self.moxx.ReplayAll()
+        result = view.get_object()
+        self.moxx.VerifyAll()
+
+        self.assertEqual(choicef, result)
+
     def test_edit_section_success_url(self):
         request = RequestFactory()
-        view = EditSectionView()
+        view = EditSectionInlineView()
         view.request = request
         view.kwargs = {'cc_id': 0}
         sec = mommy.make(Section)
         view.object = sec
 
-        self.moxx.StubOutWithMock(UpdateView, 'get_success_url')
-        UpdateView.get_success_url().AndReturn(None)
+        self.moxx.StubOutWithMock(UpdateWithInlinesView, 'get_success_url')
+        UpdateWithInlinesView.get_success_url().AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_success_url()
