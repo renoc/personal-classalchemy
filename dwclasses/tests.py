@@ -10,14 +10,16 @@ from model_mommy import mommy
 import mox
 
 from dwclasses.forms import (
-    CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm)
+    CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm,
+    CombineForm)
 from dwclasses.models import (
-    CombinedClass, CompendiumClassManager, CompendiumClass,
-    CompletedCharacter, SectionManager, Section)
+    CombinedClass, CombinedClassManager, CompendiumClassManager,
+    CompendiumClass, CompletedCharacter, SectionManager, Section)
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
-    RemoveSectionView, LinkSectionView)
+    RemoveSectionView, LinkSectionView, ListCombinedClassesView,
+    CreateCombinedClassView, EditCombinedClassView)
 
 
 class Unicode_Tests(TestCase):
@@ -408,5 +410,91 @@ class Combined_View_Tests(TestCase):
     def tearDown(self):
         self.moxx.UnsetStubs()
 
+    def test_list_get_queryset(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = ListCombinedClassesView()
+        view.request = request
+
+        self.moxx.StubOutWithMock(CombinedClassManager, 'get_user_objects')
+        CombinedClassManager.get_user_objects(user=user).AndReturn('queryset')
+        self.moxx.StubOutWithMock(ListView, 'get_queryset')
+        ListView.get_queryset().AndReturn('queryset')
+
+        self.assertFalse(view.queryset)
+
+        self.moxx.ReplayAll()
+        result = view.get_queryset()
+        self.moxx.VerifyAll()
+
+        self.assertEqual(view.queryset, 'queryset')
+
+    def test_mixin_form_kwargs(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = CreateCombinedClassView()
+        view.request = request
+
+        self.moxx.StubOutWithMock(CreateView, 'get_form_kwargs')
+        CreateView.get_form_kwargs().AndReturn({})
+        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_user_objects')
+        CompendiumClassManager.get_user_objects(user=user).AndReturn('queryset')
+
+        self.moxx.ReplayAll()
+        result = view.get_form_kwargs()
+        self.moxx.VerifyAll()
+
+        self.assertEqual({'user_compendiums': 'queryset'}, result)
+
+
+    def test_create_combined_class_form_valid(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = CreateCombinedClassView()
+        view.request = request
+        bine = CombineForm(user_compendiums=[])
+        bine.cleaned_data = {'form_name': 'testcc'}
+
+        self.moxx.StubOutWithMock(CreateCombinedClassView, 'get_success_url')
+        CreateCombinedClassView.get_success_url().AndReturn(None)
+
+        self.assertFalse(CombinedClass.objects.all().exists())
+
+        self.moxx.ReplayAll()
+        view.form_valid(form=bine)
+        self.moxx.VerifyAll()
+
+        self.assertTrue(CombinedClass.objects.all().exists())
+
+    def test_mixin_success_url(self):
+        view = EditCombinedClassView()
+        view.object = CombinedClass(form_name='testcc', id=99)
+
+        self.moxx.StubOutWithMock(UpdateView, 'get_success_url')
+        UpdateView.get_success_url().AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_success_url()
+        self.moxx.VerifyAll()
+
+        self.assertTrue(view.success_url, "/combinedclasses/99/edit")
+
     def test_edit_get_object(self):
-        pass
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = EditCombinedClassView()
+        view.request = request
+        view.kwargs = {'id': 0}
+
+        self.moxx.StubOutWithMock(CombinedClassManager, 'get_or_404')
+        CombinedClassManager.get_or_404(id=0, user=user).AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_object()
+        self.moxx.VerifyAll()
+
+        # all mocked functions called
