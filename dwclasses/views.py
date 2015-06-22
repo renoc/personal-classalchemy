@@ -1,14 +1,15 @@
-from combinedchoices.models import Choice, ChoiceField
+from combinedchoices.models import Choice, ChoiceSection
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.generic.base import RedirectView
-from django.views.generic.edit import CreateView, ModelFormMixin, UpdateView
+from django.views.generic.edit import (
+    CreateView, FormView, ModelFormMixin, UpdateView)
 from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 
 from dwclasses.forms import (
     ChoiceForm, ChoiceSectionForm, CombineForm, CompendiumClassForm,
-    SectionForm)
+    SectionForm, NewCharacterForm)
 from dwclasses.models import CompendiumClass, Section, CombinedClass
 from nav.models import LoginRequiredMixin
 
@@ -85,7 +86,7 @@ class CreateSectionView(LoginRequiredMixin, SectionMixin, CreateView):
         new_obj.user = user=self.request.user
         new_obj.save()
         self.object = new_obj
-        ChoiceField.objects.create(
+        ChoiceSection.objects.create(
             base_choice=new_obj, base_ccobj=compendium_class)
         return HttpResponseRedirect(self.get_success_url())
 
@@ -95,7 +96,7 @@ class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
     form_class = ChoiceSectionForm
     inlines = [ChoiceForm]
     inline_model = Choice
-    model = ChoiceField
+    model = ChoiceSection
     template_name = "section_edit.html"
 
     def get_form(self, form_class):
@@ -111,7 +112,7 @@ class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
         return super(EditSectionInlineView, self).construct_inlines()
 
     def get_object(self):
-        return ChoiceField.objects.get(
+        return ChoiceSection.objects.get(
             base_choice=self.get_section(),
             base_ccobj=self.get_compendium_class())
 
@@ -128,7 +129,7 @@ class RemoveSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         comp = self.get_compendium_class()
         sect = self.get_section()
-        ChoiceField.objects.get(base_ccobj=comp, base_choice=sect).delete()
+        ChoiceSection.objects.get(base_ccobj=comp, base_choice=sect).delete()
         return "/compendiumclasses/%s" % comp.id
 
 
@@ -142,7 +143,7 @@ class LinkSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         comp = self.get_compendium_class()
         sect = self.get_section()
-        ChoiceField.objects.create(base_ccobj=comp, base_choice=sect)
+        ChoiceSection.objects.create(base_ccobj=comp, base_choice=sect)
         return "/compendiumclasses/%s" % comp.id
 
 
@@ -184,6 +185,21 @@ class CreateCombinedClassView(LoginRequiredMixin, CombinedMixin, CreateView):
 
 class EditCombinedClassView(LoginRequiredMixin, CombinedMixin, UpdateView):
     template_name = "combined_class_create.html"
+
+    def get_object(self):
+        id = self.kwargs.get('id')
+        return CombinedClass.objects.get_or_404(id=id, user=self.request.user)
+
+
+class NewCharacterView(LoginRequiredMixin, FormView):
+    form_class = NewCharacterForm
+    template_name = "character_new.html"
+
+    def get_form_kwargs(self):
+        kwargs = super(NewCharacterView, self).get_form_kwargs()
+        kwargs['combined_class'] = self.get_object()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_object(self):
         id = self.kwargs.get('id')

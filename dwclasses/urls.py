@@ -20,4 +20,6 @@ urlpatterns = [
     url(r'^combinedclasses/create', views.CreateCombinedClassView.as_view()),
     url(r'^combinedclasses/(?P<id>\d+)/edit',
         views.EditCombinedClassView.as_view()),
+    url(r'^combinedclasses/(?P<id>\d+)/new_character',
+        views.NewCharacterView.as_view()),
 ]

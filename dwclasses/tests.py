@@ -1,9 +1,10 @@
-from combinedchoices.models import ChoiceField
+from combinedchoices.models import ChoiceSection
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.test.client import RequestFactory
-from django.views.generic.edit import CreateView, FormMixin, UpdateView
+from django.views.generic.edit import (
+    CreateView, FormView, FormMixin, UpdateView)
 from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 from model_mommy import mommy
@@ -19,7 +20,7 @@ from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
     RemoveSectionView, LinkSectionView, ListCombinedClassesView,
-    CreateCombinedClassView, EditCombinedClassView)
+    CreateCombinedClassView, EditCombinedClassView, NewCharacterView)
 
 
 class Unicode_Tests(TestCase):
@@ -91,8 +92,8 @@ class CompendiumClass_ModelTests(TestCase):
         modin = mommy.make(Section, field_name='in', user=user)
         modout = mommy.make(Section, field_name='out', user=user)
         modother = mommy.make(Section, field_name='other')
-        mommy.make(ChoiceField, base_ccobj=tested, base_choice=modin)
-        mommy.make(ChoiceField, base_ccobj=untested, base_choice=modout)
+        mommy.make(ChoiceSection, base_ccobj=tested, base_choice=modin)
+        mommy.make(ChoiceSection, base_ccobj=untested, base_choice=modout)
         self.assertEqual(tested.available_sections().get(), modout)
 
 
@@ -257,13 +258,13 @@ class Section_View_Tests(TestCase):
         self.moxx.StubOutWithMock(CreateSectionView, 'get_success_url')
         CreateSectionView.get_success_url().AndReturn(None)
 
-        self.assertFalse(ChoiceField.objects.all().exists())
+        self.assertFalse(ChoiceSection.objects.all().exists())
 
         self.moxx.ReplayAll()
         view.form_valid(form=form)
         self.moxx.VerifyAll()
 
-        self.assertTrue(ChoiceField.objects.all().exists())
+        self.assertTrue(ChoiceSection.objects.all().exists())
 
     def test_edit_section_get_form_subforms(self):
         view = EditSectionInlineView()
@@ -282,7 +283,7 @@ class Section_View_Tests(TestCase):
         view = EditSectionInlineView()
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        choicef = mommy.make(ChoiceField, base_choice=sec, base_ccobj=comp)
+        choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
         view.object = choicef
 
         self.moxx.StubOutWithMock(EditSectionInlineView, 'get_form_kwargs')
@@ -313,7 +314,7 @@ class Section_View_Tests(TestCase):
         view = EditSectionInlineView()
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        choicef = mommy.make(ChoiceField, base_choice=sec, base_ccobj=comp)
+        choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
 
         self.moxx.StubOutWithMock(EditSectionInlineView, 'get_section')
         EditSectionInlineView.get_section().AndReturn(sec)
@@ -349,9 +350,9 @@ class Section_View_Tests(TestCase):
         view.request = request
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        ChoiceField.objects.create(base_ccobj=comp, base_choice=sec)
+        ChoiceSection.objects.create(base_ccobj=comp, base_choice=sec)
 
-        self.assertTrue(ChoiceField.objects.all().exists())
+        self.assertTrue(ChoiceSection.objects.all().exists())
 
         self.moxx.StubOutWithMock(RemoveSectionView, 'get_compendium_class')
         RemoveSectionView.get_compendium_class().AndReturn(comp)
@@ -362,7 +363,7 @@ class Section_View_Tests(TestCase):
         view.get_redirect_url()
         self.moxx.VerifyAll()
 
-        self.assertFalse(ChoiceField.objects.all().exists())
+        self.assertFalse(ChoiceSection.objects.all().exists())
 
     def test_linksection_getsection(self):
         user = User.objects.create(username='testuser')
@@ -388,7 +389,7 @@ class Section_View_Tests(TestCase):
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
 
-        self.assertFalse(ChoiceField.objects.all().exists())
+        self.assertFalse(ChoiceSection.objects.all().exists())
 
         self.moxx.StubOutWithMock(LinkSectionView, 'get_compendium_class')
         LinkSectionView.get_compendium_class().AndReturn(comp)
@@ -399,7 +400,7 @@ class Section_View_Tests(TestCase):
         view.get_redirect_url()
         self.moxx.VerifyAll()
 
-        self.assertTrue(ChoiceField.objects.all().exists())
+        self.assertTrue(ChoiceSection.objects.all().exists())
 
 
 class Combined_View_Tests(TestCase):
@@ -487,6 +488,50 @@ class Combined_View_Tests(TestCase):
         request = RequestFactory()
         request.user = user
         view = EditCombinedClassView()
+        view.request = request
+        view.kwargs = {'id': 0}
+
+        self.moxx.StubOutWithMock(CombinedClassManager, 'get_or_404')
+        CombinedClassManager.get_or_404(id=0, user=user).AndReturn(None)
+
+        self.moxx.ReplayAll()
+        view.get_object()
+        self.moxx.VerifyAll()
+
+        # all mocked functions called
+
+
+class CharacterTests(TestCase):
+
+    def setUp(self):
+        self.moxx = mox.Mox()
+
+    def tearDown(self):
+        self.moxx.UnsetStubs()
+
+    def test_new_form_kwargs(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = NewCharacterView()
+        view.request = request
+
+        self.moxx.StubOutWithMock(FormView, 'get_form_kwargs')
+        FormView.get_form_kwargs().AndReturn({})
+        self.moxx.StubOutWithMock(NewCharacterView, 'get_object')
+        NewCharacterView.get_object().AndReturn('object')
+
+        self.moxx.ReplayAll()
+        result = view.get_form_kwargs()
+        self.moxx.VerifyAll()
+
+        self.assertEqual({'user': user, 'combined_class': 'object'}, result)
+
+    def test_new_get_obj(self):
+        user = User.objects.create(username='testuser')
+        request = RequestFactory()
+        request.user = user
+        view = NewCharacterView()
         view.request = request
         view.kwargs = {'id': 0}
 

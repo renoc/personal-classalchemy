@@ -21,8 +21,7 @@ class Section(BaseChoice):
         duplicates = Section.objects.exclude(id=self.id).filter(
             field_name=self.field_name, user=self.user)
         if duplicates.exists():
-            ValidationError(('Non-Unique Name Error'),
-                            code='invalid')
+            ValidationError(('Non-Unique Name Error'), code='invalid')
 
     def __unicode__(self):
         if not self.user:
