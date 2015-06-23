@@ -1,10 +1,12 @@
 from combinedchoices.models import Choice, ChoiceSection
+from django.forms.fields import CharField
 from django.forms.forms import Form
 from django.forms.models import ModelForm, ModelMultipleChoiceField
 from django.forms.widgets import CheckboxSelectMultiple
 from extra_views import InlineFormSet
 
-from dwclasses.models import CompendiumClass, CombinedClass, Section
+from dwclasses.models import (
+    CompletedCharacter, CompendiumClass, CombinedClass, Section)
 
 
 class ChoiceChoice(ModelMultipleChoiceField):
@@ -49,15 +51,14 @@ class CombineForm(ModelForm):
 
 
 class NewCharacterForm(Form):
+    form_name = CharField(label='Character Name')
+
     def __init__(self, *args, **kwargs):
         combined_class = kwargs.pop('combined_class')
         user = kwargs.pop('user')
         super(NewCharacterForm, self).__init__(*args, **kwargs)
-        compendiums = combined_class.included_forms.filter(
-            compendiumclass__user=user)
-        sections = Section.objects.filter(
-            choicesection__base_ccobj__in=compendiums, user=user)
-        for section in sections:
+        compendiums = self.get_compendiums(combined_class, user)
+        for section in self.get_sections(combined_class, user):
             queryset = Choice.objects.filter(
                 choice_section__base_ccobj__in=compendiums,
                 choice_section__base_choice=section).order_by('text')
@@ -66,5 +67,23 @@ class NewCharacterForm(Form):
             self.fields[section.field_name].widget = CheckboxSelectMultiple(
                 choices=self.fields[section.field_name].choices)
 
+    def get_compendiums(self, combined_class, user):
+        return combined_class.included_forms.filter(
+            compendiumclass__user=user)
+
+    def get_sections(self, combined_class, user):
+        compendiums = self.get_compendiums(combined_class, user)
+        return Section.objects.filter(
+            choicesection__base_ccobj__in=compendiums, user=user)
+
     def save(self, *args, **kwargs):
-        raise NotImplementedError
+        combined_class = kwargs.pop('combined_class')
+        user = kwargs.pop('user')
+        character = {}
+        name = self.cleaned_data.pop('form_name')
+        for section in self.cleaned_data.keys():
+            character[section] = []
+            for choice in self.cleaned_data[section]:
+                character[section].append(choice.text)
+        return CompletedCharacter.objects.create(
+            form_name=name, form_data=character, user=user)

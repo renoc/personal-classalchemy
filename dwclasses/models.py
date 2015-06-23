@@ -72,11 +72,19 @@ class CompendiumClass(BaseCCObj):
             user=self.user).exclude(baseccobj=self)
 
 
+class CharacterClassManager(ManagerMixin, models.QuerySet):
+    pass
+
+
 class CompletedCharacter(CompletedCombinedObj):
     user = models.ForeignKey(User, null=True, blank=True)
+    objects = CharacterClassManager.as_manager()
 
     def __unicode__(self):
         if not self.user:
             return super(CompletedCharacter, self).__unicode__()
         else:
             return '%s - %s' % (self.user.username, self.form_name)
+
+    def data(self):
+        return self.completedcombinedobj_ptr.form_data

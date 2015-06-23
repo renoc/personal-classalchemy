@@ -2,6 +2,7 @@ from combinedchoices.models import Choice, ChoiceSection
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.views.generic.base import RedirectView
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import (
     CreateView, FormView, ModelFormMixin, UpdateView)
 from django.views.generic.list import ListView
@@ -10,7 +11,8 @@ from extra_views.advanced import UpdateWithInlinesView
 from dwclasses.forms import (
     ChoiceForm, ChoiceSectionForm, CombineForm, CompendiumClassForm,
     SectionForm, NewCharacterForm)
-from dwclasses.models import CompendiumClass, Section, CombinedClass
+from dwclasses.models import (
+    CompendiumClass, CompletedCharacter, Section, CombinedClass)
 from nav.models import LoginRequiredMixin
 
 
@@ -195,6 +197,10 @@ class NewCharacterView(LoginRequiredMixin, FormView):
     form_class = NewCharacterForm
     template_name = "character_new.html"
 
+    def form_valid(self, form):
+        self.object = form.save(**self.get_form_kwargs())
+        return HttpResponseRedirect(self.get_success_url())
+
     def get_form_kwargs(self):
         kwargs = super(NewCharacterView, self).get_form_kwargs()
         kwargs['combined_class'] = self.get_object()
@@ -204,3 +210,26 @@ class NewCharacterView(LoginRequiredMixin, FormView):
     def get_object(self):
         id = self.kwargs.get('id')
         return CombinedClass.objects.get_or_404(id=id, user=self.request.user)
+
+    def get_success_url(self):
+        self.success_url = "/characters/%s" % self.object.id
+        return super(FormView, self).get_success_url()
+
+
+class ViewCharacterView(LoginRequiredMixin, DetailView):
+    template_name = "character_view.html"
+
+    def get_object(self):
+        id = self.kwargs.get('id')
+        return CompletedCharacter.objects.get_or_404(
+            id=id, user=self.request.user)
+
+
+class ListCharacterView(LoginRequiredMixin, ListView):
+    model = CompletedCharacter
+    template_name = "character_list.html"
+
+    def get_queryset(self):
+        self.queryset = CompletedCharacter.objects.get_user_objects(
+            user=self.request.user)
+        return super(ListCharacterView, self).get_queryset()

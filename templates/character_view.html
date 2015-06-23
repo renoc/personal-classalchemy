@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="character"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Character View</title>
+    {% endblock html-head %}
+    {% block h1 %}<h1>{{ object.form_name }}</h1>{% endblock h1 %}
+
+{% block content %}
+<div>
+    {% for section, data in object.data.items %}
+    <span class="half-width"><div class="pad">
+        <div class="blackbar">
+            <h2>{{ section }}</h2>
+        </div>
+        {% for li in data %}
+            <p>{{ li }}</p>
+        {% endfor %}
+    </div></span>
+    {% endfor %}
+</div>
+{% endblock content %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="character"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Characters</title>
+    {% endblock html-head %}
+    {% block h1 %}<h1>Saved Characters</h1>{% endblock h1 %}
+
+{% block content %}
+{% if object_list.exists %}
+    {% for character in object_list %}
+        <div>
+            <a href="/characters/{{ character.id }}" class="button blue">View Character</a>
+            {{ character.form_name }}
+        </div>
+    {% endfor %}
+{% else %}
+    <p>You have no characters saved.</p>
+{% endif %}
+{% endblock content %}
