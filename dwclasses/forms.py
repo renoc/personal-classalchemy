@@ -62,7 +62,8 @@ class NewCharacterForm(Form):
             queryset = Choice.objects.filter(
                 choice_section__base_ccobj__in=compendiums,
                 choice_section__base_choice=section).order_by('text')
-            self.fields[section.field_name] = ChoiceChoice(queryset=queryset)
+            self.fields[section.field_name] = ChoiceChoice(queryset=queryset,
+                help_text=section.instructions)
             self.fields[section.field_name].label = section.field_name
             self.fields[section.field_name].widget = CheckboxSelectMultiple(
                 choices=self.fields[section.field_name].choices)

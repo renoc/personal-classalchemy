@@ -419,19 +419,6 @@ class Combined_View_Tests(TestCase):
 
         self.assertTrue(CombinedClass.objects.all().exists())
 
-    def test_mixin_success_url(self):
-        view = EditCombinedClassView()
-        view.object = CombinedClass(form_name='testcc', id=99)
-
-        self.moxx.StubOutWithMock(UpdateView, 'get_success_url')
-        UpdateView.get_success_url().AndReturn(None)
-
-        self.moxx.ReplayAll()
-        view.get_success_url()
-        self.moxx.VerifyAll()
-
-        self.assertTrue(view.success_url, "/combinedclasses/99/edit")
-
     def test_mixin_get_object(self):
         view = create_view(EditCombinedClassView)
         view.kwargs = {'id': 0}

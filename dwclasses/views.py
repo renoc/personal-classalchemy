@@ -163,16 +163,13 @@ class ListCombinedClassesView(LoginRequiredMixin, UserModelMixin, ListView):
 
 class CombinedMixin(object):
     form_class = CombineForm
+    success_url = "/combinedclasses"
 
     def get_form_kwargs(self):
         kwargs = super(CombinedMixin, self).get_form_kwargs()
         kwargs['user_compendiums'] = CompendiumClass.objects.get_user_objects(
             user=self.request.user)
         return kwargs
-
-    def get_success_url(self):
-        self.success_url = "/combinedclasses/%s/edit" % self.object.id
-        return super(CombinedMixin, self).get_success_url()
 
 
 class CreateCombinedClassView(LoginRequiredMixin, CombinedMixin, CreateView):
@@ -189,13 +186,13 @@ class CreateCombinedClassView(LoginRequiredMixin, CombinedMixin, CreateView):
 
 class EditCombinedClassView(LoginRequiredMixin, CombinedMixin, UserModelMixin,
                             UpdateView):
-    model = CompendiumClass
+    model = CombinedClass
     template_name = "combined_class_create.html"
 
 
 class NewCharacterView(LoginRequiredMixin, UserModelMixin, FormView):
     form_class = NewCharacterForm
-    model = CompendiumClass
+    model = CombinedClass
     template_name = "character_new.html"
 
     def form_valid(self, form):

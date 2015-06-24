@@ -10,7 +10,16 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
-    {{ form }}
+    {% for field in form %}
+    <span class="half-width"><div class="pad">
+        <div class="blackbar">
+            <h2>{{ field.label_tag }}</h2>
+        </div>
+        {{ field.errors }}
+        <p>{{ field.help_text }}</p>
+        {{ field }}
+    </div></span>
+    {% endfor %}
     <p>
         <button type='submit' class="button green">Create</button>
     </p>
