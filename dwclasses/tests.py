@@ -1,4 +1,4 @@
-from combinedchoices.models import ChoiceSection
+from combinedchoices.models import ChoiceSection, Choice
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -11,16 +11,18 @@ from model_mommy import mommy
 import mox
 
 from config.models import UserModelManager
+from config.tests import create_view
 from dwclasses.forms import (
     CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm,
-    CombineForm)
+    CombineForm, NewCharacterForm)
 from dwclasses.models import (
     CombinedClass, CompendiumClass, CompletedCharacter, Section)
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
     RemoveSectionView, LinkSectionView, ListCombinedClassesView,
-    CreateCombinedClassView, EditCombinedClassView, NewCharacterView)
+    CreateCombinedClassView, EditCombinedClassView, NewCharacterView,
+    ViewCharacterView, ListCharacterView)
 
 
 class Unicode_Tests(TestCase):
@@ -105,35 +107,13 @@ class Compendium_View_Tests(TestCase):
     def tearDown(self):
         self.moxx.UnsetStubs()
 
-    def test_list_compendium_classes_view(self):
-        user = User(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = ListCompendiumClassesView()
-        view.request = request
-
-        self.moxx.StubOutWithMock(UserModelManager, 'get_user_objects')
-        UserModelManager.get_user_objects(user=user).AndReturn(None)
-        self.moxx.StubOutWithMock(ListView, 'get_queryset')
-        ListView.get_queryset().AndReturn(None)
-
-        self.moxx.ReplayAll()
-        view.get_queryset()
-        self.moxx.VerifyAll()
-
-        # all mocked functions called
-
     def test_create_compendium_get_success_url(self):
         view = CreateCompendiumClassView()
         view.object = CompendiumClass(form_name='testcc', id=99)
         self.assertTrue(view.get_success_url(), "/compendiumclasses/99")
 
     def test_create_compendium_class_form_valid(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = CreateCompendiumClassView()
-        view.request = request
+        view = create_view(CreateCompendiumClassView)
         comp = CompendiumClassForm()
         comp.cleaned_data = {'form_name': 'testcc'}
 
@@ -149,15 +129,12 @@ class Compendium_View_Tests(TestCase):
         self.assertTrue(CompendiumClass.objects.all().exists())
 
     def test_edit_compendium_class_get_object(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = EditCompendiumClassView()
-        view.request = request
+        view = create_view(EditCompendiumClassView)
         view.kwargs = {'cc_id': 0}
 
         self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
-        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
+        UserModelManager.get_or_404(
+            id=0, user=view.request.user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_object()
@@ -194,15 +171,12 @@ class Section_View_Tests(TestCase):
         self.assertEqual(context['compendium_class'], 'foo')
 
     def test_mixin_get_compendium_class(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = EditSectionInlineView()
-        view.request = request
+        view = create_view(EditSectionInlineView)
         view.kwargs = {'cc_id': 0}
 
         self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
-        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
+        UserModelManager.get_or_404(
+            id=0, user=view.request.user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_compendium_class()
@@ -211,15 +185,12 @@ class Section_View_Tests(TestCase):
         # all mocked functions called
 
     def test_mixin_get_section(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = EditSectionInlineView()
-        view.request = request
+        view = create_view(EditSectionInlineView)
         view.kwargs = {'sec_id': 0}
 
         self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
-        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
+        UserModelManager.get_or_404(
+            id=0, user=view.request.user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_section()
@@ -243,11 +214,7 @@ class Section_View_Tests(TestCase):
             view.success_url, "/compendiumclasses/0/edit_section/99")
 
     def test_create_section_valid(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = CreateSectionView()
-        view.request = request
+        view = create_view(CreateSectionView)
         form = SectionForm()
         comp = mommy.make(CompendiumClass)
         sec = Section(field_type=0)
@@ -329,9 +296,7 @@ class Section_View_Tests(TestCase):
         self.assertEqual(choicef, result)
 
     def test_edit_section_success_url(self):
-        request = RequestFactory()
-        view = EditSectionInlineView()
-        view.request = request
+        view = create_view(EditSectionInlineView)
         view.kwargs = {'cc_id': 0}
         sec = mommy.make(Section)
         view.object = sec
@@ -346,9 +311,7 @@ class Section_View_Tests(TestCase):
         # all mocked functions called
 
     def test_remove_section(self):
-        request = RequestFactory()
-        view = RemoveSectionView()
-        view.request = request
+        view = create_view(RemoveSectionView)
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
         ChoiceSection.objects.create(base_ccobj=comp, base_choice=sec)
@@ -367,15 +330,12 @@ class Section_View_Tests(TestCase):
         self.assertFalse(ChoiceSection.objects.all().exists())
 
     def test_linksection_getsection(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.POST = {'sec_id': 0}
-        request.user = user
-        view = LinkSectionView()
-        view.request = request
+        view = create_view(LinkSectionView)
+        view.request.POST = {'sec_id': 0}
 
         self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
-        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
+        UserModelManager.get_or_404(
+            id=0, user=view.request.user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_section()
@@ -384,9 +344,7 @@ class Section_View_Tests(TestCase):
         # all mocked functions called
 
     def test_link_existing_section(self):
-        request = RequestFactory()
-        view = LinkSectionView()
-        view.request = request
+        view = create_view(LinkSectionView)
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
 
@@ -412,15 +370,12 @@ class Combined_View_Tests(TestCase):
     def tearDown(self):
         self.moxx.UnsetStubs()
 
-    def test_list_get_queryset(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = ListCombinedClassesView()
-        view.request = request
+    def test_list_mixin_get_queryset(self):
+        view = create_view(ListCombinedClassesView)
 
         self.moxx.StubOutWithMock(UserModelManager, 'get_user_objects')
-        UserModelManager.get_user_objects(user=user).AndReturn('queryset')
+        UserModelManager.get_user_objects(
+            user=view.request.user).AndReturn('queryset')
         self.moxx.StubOutWithMock(ListView, 'get_queryset')
         ListView.get_queryset().AndReturn('queryset')
 
@@ -433,16 +388,13 @@ class Combined_View_Tests(TestCase):
         self.assertEqual(view.queryset, 'queryset')
 
     def test_mixin_form_kwargs(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = CreateCombinedClassView()
-        view.request = request
+        view = create_view(CreateCombinedClassView)
 
         self.moxx.StubOutWithMock(CreateView, 'get_form_kwargs')
         CreateView.get_form_kwargs().AndReturn({})
         self.moxx.StubOutWithMock(UserModelManager, 'get_user_objects')
-        UserModelManager.get_user_objects(user=user).AndReturn('queryset')
+        UserModelManager.get_user_objects(
+            user=view.request.user).AndReturn('queryset')
 
         self.moxx.ReplayAll()
         result = view.get_form_kwargs()
@@ -452,11 +404,7 @@ class Combined_View_Tests(TestCase):
 
 
     def test_create_combined_class_form_valid(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = CreateCombinedClassView()
-        view.request = request
+        view = create_view(CreateCombinedClassView)
         bine = CombineForm(user_compendiums=[])
         bine.cleaned_data = {'form_name': 'testcc'}
 
@@ -484,16 +432,13 @@ class Combined_View_Tests(TestCase):
 
         self.assertTrue(view.success_url, "/combinedclasses/99/edit")
 
-    def test_edit_get_object(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = EditCombinedClassView()
-        view.request = request
+    def test_mixin_get_object(self):
+        view = create_view(EditCombinedClassView)
         view.kwargs = {'id': 0}
 
         self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
-        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
+        UserModelManager.get_or_404(
+            id=0, user=view.request.user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_object()
@@ -502,7 +447,7 @@ class Combined_View_Tests(TestCase):
         # all mocked functions called
 
 
-class CharacterTests(TestCase):
+class Character_View_Tests(TestCase):
 
     def setUp(self):
         self.moxx = mox.Mox()
@@ -511,11 +456,7 @@ class CharacterTests(TestCase):
         self.moxx.UnsetStubs()
 
     def test_new_form_kwargs(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = NewCharacterView()
-        view.request = request
+        view = create_view(NewCharacterView)
 
         self.moxx.StubOutWithMock(FormView, 'get_form_kwargs')
         FormView.get_form_kwargs().AndReturn({})
@@ -526,21 +467,57 @@ class CharacterTests(TestCase):
         result = view.get_form_kwargs()
         self.moxx.VerifyAll()
 
-        self.assertEqual({'user': user, 'combined_class': 'object'}, result)
+        self.assertEqual({'combined_class': 'object'}, result)
 
     def test_new_get_obj(self):
-        user = User.objects.create(username='testuser')
-        request = RequestFactory()
-        request.user = user
-        view = NewCharacterView()
-        view.request = request
+        view = create_view(NewCharacterView)
         view.kwargs = {'id': 0}
 
         self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
-        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
+        UserModelManager.get_or_404(
+            id=0, user=view.request.user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_object()
         self.moxx.VerifyAll()
 
         # all mocked functions called
+
+    def test_character_form_init(self):
+        section = mommy.make(Section, field_name='test_section')
+        compendium = mommy.make(CompendiumClass, form_name='test_compendium')
+        cs = mommy.make(
+            ChoiceSection, base_ccobj=compendium, base_choice=section)
+        choice = mommy.make(Choice, text='test_choice', choice_section=cs)
+        combined = mommy.make(
+            CombinedClass, included_forms=[compendium])
+        form = NewCharacterForm(combined_class=combined)
+        self.assertEqual(
+            form.fields['test_section'].widget.choices[0][1], 'test_choice')
+
+    def test_character_form_valid(self):
+        view = create_view(NewCharacterView)
+        choice = mommy.make(Choice, text='steak')
+        combined = mommy.make(
+            CombinedClass, included_forms=[choice.choice_section.base_ccobj])
+        kwargs = {'combined_class':combined}
+        form = NewCharacterForm(**kwargs)
+        form.cleaned_data = {'form_name': 'testcc', 'entree': [choice]}
+
+        self.moxx.StubOutWithMock(NewCharacterView, 'get_success_url')
+        NewCharacterView.get_success_url().AndReturn('/')
+        self.moxx.StubOutWithMock(NewCharacterView, 'get_form_kwargs')
+        NewCharacterView.get_form_kwargs().AndReturn(kwargs)
+
+        self.assertFalse(CompletedCharacter.objects.all().exists())
+
+        self.moxx.ReplayAll()
+        view.form_valid(form=form)
+        self.moxx.VerifyAll()
+
+        self.assertTrue(CompletedCharacter.objects.all().exists())
+
+    def test_create_character_get_success_url(self):
+        view = NewCharacterView()
+        view.object = CompletedCharacter(form_name='testcc', id=99)
+        self.assertTrue(view.get_success_url(), "/characters/99")

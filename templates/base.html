@@ -8,9 +8,9 @@
     <link rel="stylesheet" type="text/css" href="{% static "base.css" %}">
 </head><body>
 
+{% block headermenu %}
 <div class="header">
     <h2><a href="/" id="h2a" class="main">Class Alchemy</a></h2>
-    <span><a href="/about" class="about">About</a></span>
 {% if user.is_authenticated %}
     <span><a href="/compendiumclasses/" class="compendium" rel="nofollow">Compendium Classes</a></span>
     <span><a href="/combinedclasses/" class="combined" rel="nofollow">Combined Classes</a></span>
@@ -21,11 +21,13 @@
         <input type="text" id="username_display" value="{{ user.get_username }}" readonly />
     </span>
 {% else %}
+    {% include 'submenu.html' %}
     <span><a href="/create_user" class="create_user">Create User</a></span>
     <span><a href="/login" class="login"><span>Login</span></a></span>
     <span id="userbox"><span id="userlink">No User</span> <input type="text" id="username_display" value="" readonly /></span>
 {% endif %}
 </div>
+{% endblock headermenu %}
 {% if messages %}
 <ul class="messages">
     {% for message in messages %}

@@ -31,14 +31,22 @@ class SectionMixin(object):
         return Section.objects.get_or_404(id=id, user=self.request.user)
 
 
-class ListCompendiumClassesView(LoginRequiredMixin, ListView):
-    model = CompendiumClass
-    template_name = "compendium_class_list.html"
+class UserModelMixin(object):
+
+    def get_object(self):
+        id = self.kwargs.get('id')
+        return self.model.objects.get_or_404(
+            id=id, user=self.request.user)
 
     def get_queryset(self):
-        self.queryset = CompendiumClass.objects.get_user_objects(
+        self.queryset = self.model.objects.get_user_objects(
             user=self.request.user)
-        return super(ListCompendiumClassesView, self).get_queryset()
+        return super(UserModelMixin, self).get_queryset()
+
+
+class ListCompendiumClassesView(LoginRequiredMixin, UserModelMixin, ListView):
+    model = CompendiumClass
+    template_name = "compendium_class_list.html"
 
 
 class CreateCompendiumClassView(LoginRequiredMixin, CreateView):
@@ -148,14 +156,9 @@ class LinkSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
         return "/compendiumclasses/%s" % comp.id
 
 
-class ListCombinedClassesView(LoginRequiredMixin, ListView):
+class ListCombinedClassesView(LoginRequiredMixin, UserModelMixin, ListView):
     model = CombinedClass
     template_name = "combined_class_list.html"
-
-    def get_queryset(self):
-        self.queryset = CombinedClass.objects.get_user_objects(
-            user=self.request.user)
-        return super(ListCombinedClassesView, self).get_queryset()
 
 
 class CombinedMixin(object):
@@ -184,16 +187,15 @@ class CreateCombinedClassView(LoginRequiredMixin, CombinedMixin, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class EditCombinedClassView(LoginRequiredMixin, CombinedMixin, UpdateView):
+class EditCombinedClassView(LoginRequiredMixin, CombinedMixin, UserModelMixin,
+                            UpdateView):
+    model = CompendiumClass
     template_name = "combined_class_create.html"
 
-    def get_object(self):
-        id = self.kwargs.get('id')
-        return CombinedClass.objects.get_or_404(id=id, user=self.request.user)
 
-
-class NewCharacterView(LoginRequiredMixin, FormView):
+class NewCharacterView(LoginRequiredMixin, UserModelMixin, FormView):
     form_class = NewCharacterForm
+    model = CompendiumClass
     template_name = "character_new.html"
 
     def form_valid(self, form):
@@ -203,32 +205,18 @@ class NewCharacterView(LoginRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super(NewCharacterView, self).get_form_kwargs()
         kwargs['combined_class'] = self.get_object()
-        kwargs['user'] = self.request.user
         return kwargs
-
-    def get_object(self):
-        id = self.kwargs.get('id')
-        return CombinedClass.objects.get_or_404(id=id, user=self.request.user)
 
     def get_success_url(self):
         self.success_url = "/characters/%s" % self.object.id
         return super(FormView, self).get_success_url()
 
 
-class ViewCharacterView(LoginRequiredMixin, DetailView):
+class ViewCharacterView(LoginRequiredMixin, UserModelMixin, DetailView):
+    model = CompletedCharacter
     template_name = "character_view.html"
 
-    def get_object(self):
-        id = self.kwargs.get('id')
-        return CompletedCharacter.objects.get_or_404(
-            id=id, user=self.request.user)
 
-
-class ListCharacterView(LoginRequiredMixin, ListView):
+class ListCharacterView(LoginRequiredMixin, UserModelMixin, ListView):
     model = CompletedCharacter
     template_name = "character_list.html"
-
-    def get_queryset(self):
-        self.queryset = CompletedCharacter.objects.get_user_objects(
-            user=self.request.user)
-        return super(ListCharacterView, self).get_queryset()

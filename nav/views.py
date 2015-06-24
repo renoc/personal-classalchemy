@@ -7,3 +7,7 @@ class About (TemplateView):
 
 class Home (TemplateView):
     template_name = 'home.html'
+
+
+class PAQ (TemplateView):
+    template_name = 'paq.html'

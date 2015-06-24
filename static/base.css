@@ -1,6 +1,6 @@
 .main .main, .about .about, .create_user .create_user, .login .login,
 .compendium .compendium, .combined .combined, .character .character,
-.user .user { color: #FC9; }
+.user .user, .paq .paq { color: #FC9; }
 
 .hpad {
     display: inline-block;
@@ -32,6 +32,7 @@ ul {
     margin: 0px auto;
     padding-left: 1.5em;
  }
+dt { margin: 1em 0em 0.5em 0em; }
 label { display: block; }
 .errorlist { background: #F9C; }
 
