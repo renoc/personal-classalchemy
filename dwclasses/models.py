@@ -2,18 +2,12 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 
-from config.models import ManagerMixin
+from config.models import UserModelMixin
 from combinedchoices.models import (
     BaseCCObj, BaseChoice, CompletedCombinedObj, ReadyCombinedObj)
 
 
-class SectionManager(ManagerMixin, models.QuerySet):
-    pass
-
-
-class Section(BaseChoice):
-    user = models.ForeignKey(User, null=True, blank=True)
-    objects = SectionManager.as_manager()
+class Section(UserModelMixin, BaseChoice):
 
     def validate_unique(self, exclude=None):
         # Call parent class to bypass override on parent class
@@ -30,13 +24,7 @@ class Section(BaseChoice):
             return '%s - %s' % (self.user.username, self.field_name)
 
 
-class CombinedClassManager(ManagerMixin, models.QuerySet):
-    pass
-
-
-class CombinedClass(ReadyCombinedObj):
-    user = models.ForeignKey(User, null=True, blank=True)
-    objects = CombinedClassManager.as_manager()
+class CombinedClass(UserModelMixin, ReadyCombinedObj):
 
     def __unicode__(self):
         if not self.user:
@@ -49,13 +37,7 @@ class CombinedClass(ReadyCombinedObj):
         return self.form_name
 
 
-class CompendiumClassManager(ManagerMixin, models.QuerySet):
-    pass
-
-
-class CompendiumClass(BaseCCObj):
-    user = models.ForeignKey(User, null=True, blank=True)
-    objects = CompendiumClassManager.as_manager()
+class CompendiumClass(UserModelMixin, BaseCCObj):
 
     def __unicode__(self):
         if not self.user:
@@ -72,13 +54,7 @@ class CompendiumClass(BaseCCObj):
             user=self.user).exclude(baseccobj=self)
 
 
-class CharacterClassManager(ManagerMixin, models.QuerySet):
-    pass
-
-
-class CompletedCharacter(CompletedCombinedObj):
-    user = models.ForeignKey(User, null=True, blank=True)
-    objects = CharacterClassManager.as_manager()
+class CompletedCharacter(UserModelMixin, CompletedCombinedObj):
 
     def __unicode__(self):
         if not self.user:

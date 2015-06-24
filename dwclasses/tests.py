@@ -10,12 +10,12 @@ from extra_views.advanced import UpdateWithInlinesView
 from model_mommy import mommy
 import mox
 
+from config.models import UserModelManager
 from dwclasses.forms import (
     CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm,
     CombineForm)
 from dwclasses.models import (
-    CombinedClass, CombinedClassManager, CompendiumClassManager,
-    CompendiumClass, CompletedCharacter, SectionManager, Section)
+    CombinedClass, CompendiumClass, CompletedCharacter, Section)
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
@@ -77,14 +77,6 @@ class CompendiumClass_ModelTests(TestCase):
         mod = CombinedClass(form_name=testname)
         self.assertEqual(mod.name, testname)
 
-    def test_get_user_classes(self):
-        user = User(username='testuser')
-        user.save()
-        mod = CompendiumClass(form_name='testuni', user=user)
-        mod.save()
-        self.assertEqual(
-            mod, CompendiumClass.objects.get_user_objects(user=user).get())
-
     def test_unlinked_choices(self):
         user = mommy.make(User, username='testuser')
         tested = mommy.make(CompendiumClass, form_name='tested', user=user)
@@ -95,6 +87,15 @@ class CompendiumClass_ModelTests(TestCase):
         mommy.make(ChoiceSection, base_ccobj=tested, base_choice=modin)
         mommy.make(ChoiceSection, base_ccobj=untested, base_choice=modout)
         self.assertEqual(tested.available_sections().get(), modout)
+
+
+class CompletedCharacter_ModelTests(TestCase):
+
+    def test_return_data(self):
+        mod = mommy.make(CompletedCharacter, form_name='testuni')
+        mod = CompletedCharacter.objects.get(id=mod.id)
+        self.assertFalse(type(mod.form_data) is dict)  # String
+        self.assertTrue(type(mod.data()) is dict)
 
 
 class Compendium_View_Tests(TestCase):
@@ -111,8 +112,8 @@ class Compendium_View_Tests(TestCase):
         view = ListCompendiumClassesView()
         view.request = request
 
-        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_user_objects')
-        CompendiumClassManager.get_user_objects(user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(UserModelManager, 'get_user_objects')
+        UserModelManager.get_user_objects(user=user).AndReturn(None)
         self.moxx.StubOutWithMock(ListView, 'get_queryset')
         ListView.get_queryset().AndReturn(None)
 
@@ -155,8 +156,8 @@ class Compendium_View_Tests(TestCase):
         view.request = request
         view.kwargs = {'cc_id': 0}
 
-        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_or_404')
-        CompendiumClassManager.get_or_404(id=0, user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
+        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_object()
@@ -200,8 +201,8 @@ class Section_View_Tests(TestCase):
         view.request = request
         view.kwargs = {'cc_id': 0}
 
-        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_or_404')
-        CompendiumClassManager.get_or_404(id=0, user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
+        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_compendium_class()
@@ -217,8 +218,8 @@ class Section_View_Tests(TestCase):
         view.request = request
         view.kwargs = {'sec_id': 0}
 
-        self.moxx.StubOutWithMock(SectionManager, 'get_or_404')
-        SectionManager.get_or_404(id=0, user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
+        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_section()
@@ -373,8 +374,8 @@ class Section_View_Tests(TestCase):
         view = LinkSectionView()
         view.request = request
 
-        self.moxx.StubOutWithMock(SectionManager, 'get_or_404')
-        SectionManager.get_or_404(id=0, user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
+        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_section()
@@ -418,8 +419,8 @@ class Combined_View_Tests(TestCase):
         view = ListCombinedClassesView()
         view.request = request
 
-        self.moxx.StubOutWithMock(CombinedClassManager, 'get_user_objects')
-        CombinedClassManager.get_user_objects(user=user).AndReturn('queryset')
+        self.moxx.StubOutWithMock(UserModelManager, 'get_user_objects')
+        UserModelManager.get_user_objects(user=user).AndReturn('queryset')
         self.moxx.StubOutWithMock(ListView, 'get_queryset')
         ListView.get_queryset().AndReturn('queryset')
 
@@ -440,8 +441,8 @@ class Combined_View_Tests(TestCase):
 
         self.moxx.StubOutWithMock(CreateView, 'get_form_kwargs')
         CreateView.get_form_kwargs().AndReturn({})
-        self.moxx.StubOutWithMock(CompendiumClassManager, 'get_user_objects')
-        CompendiumClassManager.get_user_objects(user=user).AndReturn('queryset')
+        self.moxx.StubOutWithMock(UserModelManager, 'get_user_objects')
+        UserModelManager.get_user_objects(user=user).AndReturn('queryset')
 
         self.moxx.ReplayAll()
         result = view.get_form_kwargs()
@@ -491,8 +492,8 @@ class Combined_View_Tests(TestCase):
         view.request = request
         view.kwargs = {'id': 0}
 
-        self.moxx.StubOutWithMock(CombinedClassManager, 'get_or_404')
-        CombinedClassManager.get_or_404(id=0, user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
+        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_object()
@@ -535,8 +536,8 @@ class CharacterTests(TestCase):
         view.request = request
         view.kwargs = {'id': 0}
 
-        self.moxx.StubOutWithMock(CombinedClassManager, 'get_or_404')
-        CombinedClassManager.get_or_404(id=0, user=user).AndReturn(None)
+        self.moxx.StubOutWithMock(UserModelManager, 'get_or_404')
+        UserModelManager.get_or_404(id=0, user=user).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_object()
