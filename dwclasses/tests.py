@@ -1,3 +1,4 @@
+from django import http
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -486,20 +487,55 @@ class Character_View_Tests(TestCase):
 
         # all mocked functions called
 
-    def test_character_form_init(self):
-        section = mommy.make(Section, field_name='test_section')
-        compendium = mommy.make(CompendiumClass, form_name='test_compendium')
-        cs = mommy.make(
-            CompendiumSection, base_ccobj=compendium, base_choice=section)
-        choice = mommy.make(Selection, text='test_choice', choice_section=cs)
-        combined = mommy.make(
-            CombinedClass, included_forms=[compendium])
+    def test_character_form_init_cross(self):
+        sect = mommy.make(Section, field_name='section', cross_combine=True)
+        comp1 = mommy.make(CompendiumClass, form_name='test_compendium')
+        cs = mommy.make(CompendiumSection, base_ccobj=comp1, base_choice=sect)
+        mommy.make(Selection, text='test_choice', choice_section=cs)
+        comp2 = mommy.make(CompendiumClass, form_name='compendium_test')
+        cs = mommy.make(CompendiumSection, base_ccobj=comp2, base_choice=sect)
+        mommy.make(Selection, text='choice_test', choice_section=cs)
+        combined = mommy.make(CombinedClass, included_forms=[comp1])
         form = NewCharacterForm(combined_class=combined)
-        self.assertEqual(
-            form.fields['test_section'].widget.choices[0][1], 'test_choice')
+        choices = form.fields['section'].widget.choices
+        self.assertEqual(choices[0][1], 'test_choice')
+
+    def test_character_form_init_uncross(self):
+        sect = mommy.make(Section, field_name='section', cross_combine=False)
+        comp1 = mommy.make(CompendiumClass, form_name='test_compendium')
+        cs = mommy.make(CompendiumSection, base_ccobj=comp1, base_choice=sect)
+        mommy.make(Selection, text='test_choice', choice_section=cs)
+        comp2 = mommy.make(CompendiumClass, form_name='compendium_test')
+        cs = mommy.make(CompendiumSection, base_ccobj=comp2, base_choice=sect)
+        mommy.make(Selection, text='choice_test', choice_section=cs)
+        combined = mommy.make(CombinedClass, included_forms=[comp1])
+        form = NewCharacterForm(combined_class=combined)
+        choices = form.fields['test_compendium - section'].widget.choices
+        self.assertEqual(choices[0][1], 'test_choice')
 
     def test_character_form_valid(self):
         view = create_view(NewCharacterView)
+        combined = mommy.make(CombinedClass)
+        kwargs = {'combined_class':combined}
+
+        self.moxx.StubOutWithMock(NewCharacterView, 'get_success_url')
+        NewCharacterView.get_success_url().AndReturn('/')
+        self.moxx.StubOutWithMock(NewCharacterView, 'get_form_kwargs')
+        NewCharacterView.get_form_kwargs().AndReturn(kwargs)
+        self.moxx.StubOutWithMock(http, 'HttpResponseRedirect')
+        http.HttpResponseRedirect('/').AndReturn(None)
+        self.moxx.StubOutWithMock(NewCharacterForm, 'save')
+        NewCharacterForm.save(**kwargs).AndReturn(None)
+        self.moxx.StubOutWithMock(NewCharacterForm, 'create_section_field')
+
+        self.moxx.ReplayAll()
+        form = NewCharacterForm(**kwargs)
+        view.form_valid(form=form)
+        self.moxx.VerifyAll()
+
+        # proper mocked functions called
+
+    def test_character_form_save(self):
         choice = mommy.make(Selection, text='steak')
         combined = mommy.make(
             CombinedClass, included_forms=[choice.choice_section.base_ccobj])
@@ -507,16 +543,9 @@ class Character_View_Tests(TestCase):
         form = NewCharacterForm(**kwargs)
         form.cleaned_data = {'form_name': 'testcc', 'entree': [choice]}
 
-        self.moxx.StubOutWithMock(NewCharacterView, 'get_success_url')
-        NewCharacterView.get_success_url().AndReturn('/')
-        self.moxx.StubOutWithMock(NewCharacterView, 'get_form_kwargs')
-        NewCharacterView.get_form_kwargs().AndReturn(kwargs)
-
         self.assertFalse(CompletedCharacter.objects.all().exists())
 
-        self.moxx.ReplayAll()
-        view.form_valid(form=form)
-        self.moxx.VerifyAll()
+        form.save(**kwargs)
 
         self.assertTrue(CompletedCharacter.objects.all().exists())
 

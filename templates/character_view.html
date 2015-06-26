@@ -14,7 +14,7 @@
 <br />
 <div>
     {% for section, data in object.form_data.items %}
-    <span class="half-width"><div class="pad">
+    <span class="half-width{% cycle '' ' align-right' %}"><div class="pad">
         <div class="blackbar">
             <h2>{{ section }}</h2>
         </div>

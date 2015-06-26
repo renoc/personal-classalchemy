@@ -61,20 +61,32 @@ class NewCharacterForm(Form):
         user = combined_class.user
         super(NewCharacterForm, self).__init__(*args, **kwargs)
         compendiums = combined_class.included_forms.filter(user=user)
-        for section in self.get_sections(combined_class, compendiums):
-            queryset = Selection.objects.filter(
-                choice_section__base_ccobj__in=compendiums,
-                choice_section__base_choice=section).order_by('text')
-            self.fields[section.field_name] = ChoiceChoice(queryset=queryset,
-                help_text=section.instructions)
-            self.fields[section.field_name].label = section.field_name
-            self.fields[section.field_name].widget = CheckboxSelectMultiple(
-                choices=self.fields[section.field_name].choices)
+        for section in self.get_sections(user, compendiums):
+            if section.cross_combine:
+                name = section.field_name
+                queryset = Selection.objects.filter(
+                    choice_section__base_ccobj__in=compendiums)
+                self.create_section_field(name, section, queryset)
+            else:
+                for compendium in compendiums:
+                    name = '%s - %s' % (
+                        compendium.form_name, section.field_name)
+                    queryset = Selection.objects.filter(
+                        choice_section__base_ccobj=compendium)
+                    self.create_section_field(name, section, queryset)
 
-    def get_sections(self, combined_class, compendiums):
+    def create_section_field(self, name, section, queryset):
+        queryset = queryset.filter(
+            choice_section__base_choice=section).order_by('text')
+        self.fields[name] = ChoiceChoice(
+            queryset=queryset, help_text=section.instructions)
+        self.fields[name].label = name
+        self.fields[name].widget = CheckboxSelectMultiple(
+            choices=self.fields[name].choices)
+
+    def get_sections(self, user, compendiums):
         return Section.objects.filter(
-            compendiumsection__base_ccobj__in=compendiums,
-            user=combined_class.user)
+            compendiumsection__base_ccobj__in=compendiums, user=user)
 
     def save(self, *args, **kwargs):
         combined_class = kwargs.pop('combined_class')

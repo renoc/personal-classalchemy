@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django import http
 from django.views.generic.base import RedirectView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (
@@ -66,7 +66,7 @@ class CreateCompendiumClassView(LoginRequiredMixin, CreateView):
         self.object = new_obj
         if form.cleaned_data['use_dw_defaults']:
             utils.populate_sections(new_obj)
-        return HttpResponseRedirect(self.get_success_url())
+        return http.HttpResponseRedirect(self.get_success_url())
 
 
 class EditCompendiumClassView(LoginRequiredMixin, SectionMixin, UpdateView):
@@ -100,7 +100,7 @@ class CreateSectionView(LoginRequiredMixin, SectionMixin, CreateView):
         self.object = new_obj
         CompendiumSection.objects.create(
             base_choice=new_obj, base_ccobj=compendium_class)
-        return HttpResponseRedirect(self.get_success_url())
+        return http.HttpResponseRedirect(self.get_success_url())
 
 
 class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
@@ -184,7 +184,7 @@ class CreateCombinedClassView(LoginRequiredMixin, CombinedMixin, CreateView):
         new_obj.save()
         form.save_m2m()
         self.object = new_obj
-        return HttpResponseRedirect(self.get_success_url())
+        return http.HttpResponseRedirect(self.get_success_url())
 
 
 class EditCombinedClassView(LoginRequiredMixin, CombinedMixin, UserModelMixin,
@@ -200,7 +200,7 @@ class NewCharacterView(LoginRequiredMixin, UserModelMixin, FormView):
 
     def form_valid(self, form):
         self.object = form.save(**self.get_form_kwargs())
-        return HttpResponseRedirect(self.get_success_url())
+        return http.HttpResponseRedirect(self.get_success_url())
 
     def get_form_kwargs(self):
         kwargs = super(NewCharacterView, self).get_form_kwargs()
