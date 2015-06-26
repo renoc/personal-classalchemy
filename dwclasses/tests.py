@@ -1,4 +1,3 @@
-from combinedchoices.models import ChoiceSection, Choice
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -13,10 +12,11 @@ import mox
 from config.models import UserModelManager
 from config.tests import create_view
 from dwclasses.forms import (
-    CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm,
+    CompendiumClassForm, SectionForm, CompendiumSectionForm, ChoiceForm,
     CombineForm, NewCharacterForm)
 from dwclasses.models import (
-    CombinedClass, CompendiumClass, CompletedCharacter, Section)
+    CombinedClass, CompendiumClass, CompletedCharacter, Section,
+    CompendiumSection, Selection)
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
@@ -86,18 +86,9 @@ class CompendiumClass_ModelTests(TestCase):
         modin = mommy.make(Section, field_name='in', user=user)
         modout = mommy.make(Section, field_name='out', user=user)
         modother = mommy.make(Section, field_name='other')
-        mommy.make(ChoiceSection, base_ccobj=tested, base_choice=modin)
-        mommy.make(ChoiceSection, base_ccobj=untested, base_choice=modout)
+        mommy.make(CompendiumSection, base_ccobj=tested, base_choice=modin)
+        mommy.make(CompendiumSection, base_ccobj=untested, base_choice=modout)
         self.assertEqual(tested.available_sections().get(), modout)
-
-
-class CompletedCharacter_ModelTests(TestCase):
-
-    def test_return_data(self):
-        mod = mommy.make(CompletedCharacter, form_name='testuni')
-        mod = CompletedCharacter.objects.get(id=mod.id)
-        self.assertFalse(type(mod.form_data) is dict)  # String
-        self.assertTrue(type(mod.data()) is dict)
 
 
 class Compendium_View_Tests(TestCase):
@@ -226,13 +217,13 @@ class Section_View_Tests(TestCase):
         self.moxx.StubOutWithMock(CreateSectionView, 'get_success_url')
         CreateSectionView.get_success_url().AndReturn(None)
 
-        self.assertFalse(ChoiceSection.objects.all().exists())
+        self.assertFalse(CompendiumSection.objects.all().exists())
 
         self.moxx.ReplayAll()
         view.form_valid(form=form)
         self.moxx.VerifyAll()
 
-        self.assertTrue(ChoiceSection.objects.all().exists())
+        self.assertTrue(CompendiumSection.objects.all().exists())
 
     def test_edit_section_get_form_subforms(self):
         view = EditSectionInlineView()
@@ -251,7 +242,7 @@ class Section_View_Tests(TestCase):
         view = EditSectionInlineView()
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
+        choicef = mommy.make(CompendiumSection, base_choice=sec, base_ccobj=comp)
         view.object = choicef
 
         self.moxx.StubOutWithMock(EditSectionInlineView, 'get_form_kwargs')
@@ -259,7 +250,7 @@ class Section_View_Tests(TestCase):
         self.moxx.StubOutWithMock(UpdateWithInlinesView, 'get_form')
 
         self.moxx.ReplayAll()
-        form = view.get_form(ChoiceSectionForm)
+        form = view.get_form(CompendiumSectionForm)
         self.moxx.VerifyAll()
 
         self.assertEqual(type(form), SectionForm)
@@ -282,7 +273,7 @@ class Section_View_Tests(TestCase):
         view = EditSectionInlineView()
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
+        choicef = mommy.make(CompendiumSection, base_choice=sec, base_ccobj=comp)
 
         self.moxx.StubOutWithMock(EditSectionInlineView, 'get_section')
         EditSectionInlineView.get_section().AndReturn(sec)
@@ -314,9 +305,9 @@ class Section_View_Tests(TestCase):
         view = create_view(RemoveSectionView)
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        ChoiceSection.objects.create(base_ccobj=comp, base_choice=sec)
+        CompendiumSection.objects.create(base_ccobj=comp, base_choice=sec)
 
-        self.assertTrue(ChoiceSection.objects.all().exists())
+        self.assertTrue(CompendiumSection.objects.all().exists())
 
         self.moxx.StubOutWithMock(RemoveSectionView, 'get_compendium_class')
         RemoveSectionView.get_compendium_class().AndReturn(comp)
@@ -327,7 +318,7 @@ class Section_View_Tests(TestCase):
         view.get_redirect_url()
         self.moxx.VerifyAll()
 
-        self.assertFalse(ChoiceSection.objects.all().exists())
+        self.assertFalse(CompendiumSection.objects.all().exists())
 
     def test_linksection_getsection(self):
         view = create_view(LinkSectionView)
@@ -348,7 +339,7 @@ class Section_View_Tests(TestCase):
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
 
-        self.assertFalse(ChoiceSection.objects.all().exists())
+        self.assertFalse(CompendiumSection.objects.all().exists())
 
         self.moxx.StubOutWithMock(LinkSectionView, 'get_compendium_class')
         LinkSectionView.get_compendium_class().AndReturn(comp)
@@ -359,7 +350,7 @@ class Section_View_Tests(TestCase):
         view.get_redirect_url()
         self.moxx.VerifyAll()
 
-        self.assertTrue(ChoiceSection.objects.all().exists())
+        self.assertTrue(CompendiumSection.objects.all().exists())
 
 
 class Combined_View_Tests(TestCase):
@@ -474,8 +465,8 @@ class Character_View_Tests(TestCase):
         section = mommy.make(Section, field_name='test_section')
         compendium = mommy.make(CompendiumClass, form_name='test_compendium')
         cs = mommy.make(
-            ChoiceSection, base_ccobj=compendium, base_choice=section)
-        choice = mommy.make(Choice, text='test_choice', choice_section=cs)
+            CompendiumSection, base_ccobj=compendium, base_choice=section)
+        choice = mommy.make(Selection, text='test_choice', choice_section=cs)
         combined = mommy.make(
             CombinedClass, included_forms=[compendium])
         form = NewCharacterForm(combined_class=combined)
@@ -484,7 +475,7 @@ class Character_View_Tests(TestCase):
 
     def test_character_form_valid(self):
         view = create_view(NewCharacterView)
-        choice = mommy.make(Choice, text='steak')
+        choice = mommy.make(Selection, text='steak')
         combined = mommy.make(
             CombinedClass, included_forms=[choice.choice_section.base_ccobj])
         kwargs = {'combined_class':combined}

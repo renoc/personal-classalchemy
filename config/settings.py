@@ -1,4 +1,6 @@
 import os
+import sys
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -18,13 +20,20 @@ DEFAULT_APPS = (
 
 THIRD_PARTY_APPS = (
     'combinedchoices',
-    'dwclasses',
 )
 
 LOCAL_APPS = (
-    'nav',
     'accounts',
+    'dwclasses',
+    'nav',
 )
+
+
+# CombinedClass settings
+BASE_MODEL = 'dwclasses.CompendiumClass'
+SECTION_MODEL = 'dwclasses.Section'
+THROUGH_MODEL = 'dwclasses.CompendiumSection'
+
 
 # Replace in local_settings for developement
 DEBUG_APPS = ()

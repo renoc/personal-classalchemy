@@ -1,12 +1,12 @@
-from combinedchoices.models import Choice, ChoiceSection
-from django.forms.fields import CharField
+from django.forms.fields import BooleanField, CharField
 from django.forms.forms import Form
 from django.forms.models import ModelForm, ModelMultipleChoiceField
 from django.forms.widgets import CheckboxSelectMultiple
 from extra_views import InlineFormSet
 
 from dwclasses.models import (
-    CompletedCharacter, CompendiumClass, CombinedClass, Section)
+    CompletedCharacter, CompendiumClass, CombinedClass, Section,
+    CompendiumSection, Selection)
 
 
 class ChoiceChoice(ModelMultipleChoiceField):
@@ -16,10 +16,13 @@ class ChoiceChoice(ModelMultipleChoiceField):
 
 
 class ChoiceForm(InlineFormSet):
-    model = Choice
+    model = Selection
 
 
 class CompendiumClassForm(ModelForm):
+#    use_dw_defaults = BooleanField(
+#        label='Populate with DungeonWorld Data', initial=True)
+
     class Meta:
         model = CompendiumClass
         fields = ('form_name',)
@@ -31,9 +34,9 @@ class SectionForm(ModelForm):
         exclude = ('user',)
 
 
-class ChoiceSectionForm(ModelForm):
+class CompendiumSectionForm(ModelForm):
     class Meta:
-        model = Choice
+        model = Selection
         exclude = []
 
 
@@ -57,9 +60,9 @@ class NewCharacterForm(Form):
         combined_class = kwargs.pop('combined_class')
         user = combined_class.user
         super(NewCharacterForm, self).__init__(*args, **kwargs)
-        compendiums = self.get_compendiums(combined_class)
-        for section in self.get_sections(combined_class):
-            queryset = Choice.objects.filter(
+        compendiums = combined_class.included_forms.filter(user=user)
+        for section in self.get_sections(combined_class, compendiums):
+            queryset = Selection.objects.filter(
                 choice_section__base_ccobj__in=compendiums,
                 choice_section__base_choice=section).order_by('text')
             self.fields[section.field_name] = ChoiceChoice(queryset=queryset,
@@ -68,14 +71,10 @@ class NewCharacterForm(Form):
             self.fields[section.field_name].widget = CheckboxSelectMultiple(
                 choices=self.fields[section.field_name].choices)
 
-    def get_compendiums(self, combined_class):
-        return combined_class.included_forms.filter(
-            compendiumclass__user=combined_class.user)
-
-    def get_sections(self, combined_class):
-        compendiums = self.get_compendiums(combined_class)
+    def get_sections(self, combined_class, compendiums):
         return Section.objects.filter(
-            choicesection__base_ccobj__in=compendiums, user=combined_class.user)
+            compendiumsection__base_ccobj__in=compendiums,
+            user=combined_class.user)
 
     def save(self, *args, **kwargs):
         combined_class = kwargs.pop('combined_class')

@@ -1,4 +1,3 @@
-from combinedchoices.models import Choice, ChoiceSection
 from django.http import HttpResponseRedirect
 from django.views.generic.base import RedirectView
 from django.views.generic.detail import DetailView
@@ -8,10 +7,12 @@ from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 
 from dwclasses.forms import (
-    ChoiceForm, ChoiceSectionForm, CombineForm, CompendiumClassForm,
+    ChoiceForm, CompendiumSectionForm, CombineForm, CompendiumClassForm,
     SectionForm, NewCharacterForm)
 from dwclasses.models import (
-    CompendiumClass, CompletedCharacter, Section, CombinedClass)
+    CombinedClass, CompendiumClass, CompletedCharacter, Section,
+    Selection, CompendiumSection)
+from dwclasses.utils import populate_sections
 from nav.models import LoginRequiredMixin
 
 
@@ -63,6 +64,8 @@ class CreateCompendiumClassView(LoginRequiredMixin, CreateView):
         new_obj.user = user=self.request.user
         new_obj.save()
         self.object = new_obj
+#        if form.cleaned_data['use_dw_defaults']:
+#            populate_sections(new_obj)
         return HttpResponseRedirect(self.get_success_url())
 
 
@@ -95,24 +98,24 @@ class CreateSectionView(LoginRequiredMixin, SectionMixin, CreateView):
         new_obj.user = user=self.request.user
         new_obj.save()
         self.object = new_obj
-        ChoiceSection.objects.create(
+        CompendiumSection.objects.create(
             base_choice=new_obj, base_ccobj=compendium_class)
         return HttpResponseRedirect(self.get_success_url())
 
 
 class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
                             UpdateWithInlinesView):
-    form_class = ChoiceSectionForm
+    form_class = CompendiumSectionForm
     inlines = [ChoiceForm]
-    inline_model = Choice
-    model = ChoiceSection
+    inline_model = Selection
+    model = CompendiumSection
     template_name = "section_edit.html"
 
     def get_form(self, form_class):
-        if not form_class == ChoiceSectionForm:
+        if not form_class == CompendiumSectionForm:
             return super(EditSectionInlineView, self).get_form(form_class)
         kwargs = self.get_form_kwargs()
-        kwargs['instance'] = self.object.base_choice.section
+        kwargs['instance'] = self.object.base_choice
         return SectionForm(**kwargs)
 
     def construct_inlines(self):
@@ -121,7 +124,7 @@ class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
         return super(EditSectionInlineView, self).construct_inlines()
 
     def get_object(self):
-        return ChoiceSection.objects.get(
+        return CompendiumSection.objects.get(
             base_choice=self.get_section(),
             base_ccobj=self.get_compendium_class())
 
@@ -138,7 +141,7 @@ class RemoveSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         comp = self.get_compendium_class()
         sect = self.get_section()
-        ChoiceSection.objects.get(base_ccobj=comp, base_choice=sect).delete()
+        CompendiumSection.objects.get(base_ccobj=comp, base_choice=sect).delete()
         return "/compendiumclasses/%s" % comp.id
 
 
@@ -152,7 +155,7 @@ class LinkSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         comp = self.get_compendium_class()
         sect = self.get_section()
-        ChoiceSection.objects.create(base_ccobj=comp, base_choice=sect)
+        CompendiumSection.objects.create(base_ccobj=comp, base_choice=sect)
         return "/compendiumclasses/%s" % comp.id
 
 

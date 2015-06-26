@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 
 from config.models import UserModelMixin
 from combinedchoices.models import (
-    BaseCCObj, BaseChoice, CompletedCombinedObj, ReadyCombinedObj)
+    BaseCCObj, BaseChoice, CompletedCombinedObj, ReadyCombinedObj,
+    ChoiceSection, Choice)
 
 
 class Section(UserModelMixin, BaseChoice):
@@ -24,19 +25,6 @@ class Section(UserModelMixin, BaseChoice):
             return '%s - %s' % (self.user.username, self.field_name)
 
 
-class CombinedClass(UserModelMixin, ReadyCombinedObj):
-
-    def __unicode__(self):
-        if not self.user:
-            return super(CombinedClass, self).__unicode__()
-        else:
-            return '%s - %s' % (self.user.username, self.form_name)
-
-    @property
-    def name(self):
-        return self.form_name
-
-
 class CompendiumClass(UserModelMixin, BaseCCObj):
 
     def __unicode__(self):
@@ -50,8 +38,29 @@ class CompendiumClass(UserModelMixin, BaseCCObj):
         return self.form_name
 
     def available_sections(self):
-        return Section.objects.filter(
-            user=self.user).exclude(baseccobj=self)
+        return Section.objects.filter(user=self.user).exclude(
+            compendiumclass=self)
+
+
+class CompendiumSection(ChoiceSection):
+    pass
+
+
+class Selection(Choice):
+    pass
+
+
+class CombinedClass(UserModelMixin, ReadyCombinedObj):
+
+    def __unicode__(self):
+        if not self.user:
+            return super(CombinedClass, self).__unicode__()
+        else:
+            return '%s - %s' % (self.user.username, self.form_name)
+
+    @property
+    def name(self):
+        return self.form_name
 
 
 class CompletedCharacter(UserModelMixin, CompletedCombinedObj):
@@ -61,6 +70,3 @@ class CompletedCharacter(UserModelMixin, CompletedCombinedObj):
             return super(CompletedCharacter, self).__unicode__()
         else:
             return '%s - %s' % (self.user.username, self.form_name)
-
-    def data(self):
-        return self.completedcombinedobj_ptr.form_data
