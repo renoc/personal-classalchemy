@@ -11,6 +11,7 @@ import mox
 
 from config.models import UserModelManager
 from config.tests import create_view
+from dwclasses import utils
 from dwclasses.forms import (
     CompendiumClassForm, SectionForm, CompendiumSectionForm, ChoiceForm,
     CombineForm, NewCharacterForm)
@@ -106,8 +107,32 @@ class Compendium_View_Tests(TestCase):
     def test_create_compendium_class_form_valid(self):
         view = create_view(CreateCompendiumClassView)
         comp = CompendiumClassForm()
-        comp.cleaned_data = {'form_name': 'testcc'}
+        comp.cleaned_data = {'form_name': 'testcc', 'use_dw_defaults': False}
 
+        self.moxx.StubOutWithMock(CompendiumClassForm, 'save')
+        CompendiumClassForm.save(commit=False).AndReturn(CompendiumClass())
+        self.moxx.StubOutWithMock(utils, 'populate_sections')
+        self.moxx.StubOutWithMock(CreateCompendiumClassView, 'get_success_url')
+        CreateCompendiumClassView.get_success_url().AndReturn(None)
+
+        self.assertFalse(CompendiumClass.objects.all().exists())
+
+        self.moxx.ReplayAll()
+        view.form_valid(form=comp)
+        self.moxx.VerifyAll()
+
+        self.assertTrue(CompendiumClass.objects.all().exists())
+
+    def test_create_compendium_class_form_populate_trigger(self):
+        view = create_view(CreateCompendiumClassView)
+        comp = CompendiumClassForm()
+        comp.cleaned_data = {'form_name': 'testcc', 'use_dw_defaults': True}
+        obj = CompendiumClass()
+
+        self.moxx.StubOutWithMock(CompendiumClassForm, 'save')
+        CompendiumClassForm.save(commit=False).AndReturn(obj)
+        self.moxx.StubOutWithMock(utils, 'populate_sections')
+        utils.populate_sections(obj).AndReturn(None)
         self.moxx.StubOutWithMock(CreateCompendiumClassView, 'get_success_url')
         CreateCompendiumClassView.get_success_url().AndReturn(None)
 
@@ -499,3 +524,75 @@ class Character_View_Tests(TestCase):
         view = NewCharacterView()
         view.object = CompletedCharacter(form_name='testcc', id=99)
         self.assertTrue(view.get_success_url(), "/characters/99")
+
+
+class Utility_Tests(TestCase):
+
+    def setUp(self):
+        self.moxx = mox.Mox()
+
+    def tearDown(self):
+        self.moxx.UnsetStubs()
+
+    def test_get_section_true(self):
+        sect = Section.objects.create(field_name='Adventurer Gear', field_type=0)
+        result = utils.get_section(('gear', 'Gear', {}),)
+        self.assertEqual(result, sect)
+
+    def test_get_section_false(self):
+        sect = Section.objects.create(field_name='Equipment', field_type=0)
+        result = utils.get_section(('gear', 'Gear', {'field_type': 0}),)
+        self.assertNotEqual(result, sect)
+
+    def test_populate_sections_basic(self):
+        comp = CompendiumClass.objects.create()
+        section = ['gear', 'Gear', {'field_type': 0}]
+        sect = Section.objects.create(field_type=0)
+
+        self.moxx.StubOutWithMock(utils, 'get_section')
+        utils.get_section(section, user=None).AndReturn(sect)
+
+        self.assertFalse(comp.compendiumsection_set.exists())
+
+        self.moxx.ReplayAll()
+        utils.populate_sections(comp, [section])
+        self.moxx.VerifyAll()
+
+        self.assertTrue(comp.compendiumsection_set.exists())
+        self.assertFalse(Selection.objects.all().exists())
+
+    def test_populate_sections_advanced(self):
+        comp = CompendiumClass.objects.create()
+        section = ['2-5', 'Advanced Moves 2-5', {'field_type': 0}]
+        sect = Section.objects.create(
+            field_name='Advanced Moves 2-5', field_type=0)
+
+        self.moxx.StubOutWithMock(utils, 'get_section')
+        utils.get_section(section, user=None).AndReturn(sect)
+
+        self.assertFalse(comp.compendiumsection_set.exists())
+
+        self.moxx.ReplayAll()
+        utils.populate_sections(comp, [section])
+        self.moxx.VerifyAll()
+
+        self.assertTrue(comp.compendiumsection_set.exists())
+        self.assertTrue(Selection.objects.all().exists())
+
+    def test_populate_sections_advanceder(self):
+        comp = CompendiumClass.objects.create()
+        section = ['6-10', 'Advanced Moves 6-10', {'field_type': 0}]
+        sect = Section.objects.create(
+            field_name='Advanced Moves 6-10', field_type=0)
+
+        self.moxx.StubOutWithMock(utils, 'get_section')
+        utils.get_section(section, user=None).AndReturn(sect)
+
+        self.assertFalse(comp.compendiumsection_set.exists())
+
+        self.moxx.ReplayAll()
+        utils.populate_sections(comp, [section])
+        self.moxx.VerifyAll()
+
+        self.assertTrue(comp.compendiumsection_set.exists())
+        self.assertTrue(Selection.objects.all().exists())

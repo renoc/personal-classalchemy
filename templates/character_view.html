@@ -9,7 +9,11 @@
 
 {% block content %}
 <div>
-    {% for section, data in object.data.items %}
+    <a href="/characters/" class="button grey">Return to Characters List</a>
+</div>
+<br />
+<div>
+    {% for section, data in object.form_data.items %}
     <span class="half-width"><div class="pad">
         <div class="blackbar">
             <h2>{{ section }}</h2>

@@ -13,10 +13,14 @@
     <div class="fieldWrapper">
         {{ form.form_name.errors }}
         <label for="{{ form.form_name.id_for_label }}">Class Name</label>
-        <p> {{ form.form_name }}</p>
+        <p>{{ form.form_name }}</p>
+    </div>
+    <div class="fieldWrapper">
+        {{ form.use_dw_defaults.errors }}
+        <label for="{{ form.use_dw_defaults.id_for_label }}">{{ form.use_dw_defaults }} Populate with default DungeonWorld sections</label>
     </div>
     <p>
-    <button type='submit' class="button green">Create</button>
+        <button type='submit' class="button green">Create</button>
     </p>
 </form>
 {% endblock content %}

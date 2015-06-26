@@ -20,8 +20,8 @@ class ChoiceForm(InlineFormSet):
 
 
 class CompendiumClassForm(ModelForm):
-#    use_dw_defaults = BooleanField(
-#        label='Populate with DungeonWorld Data', initial=True)
+    use_dw_defaults = BooleanField(
+        label='Populate with DungeonWorld Data', initial=True, required=False)
 
     class Meta:
         model = CompendiumClass

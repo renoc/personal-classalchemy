@@ -6,13 +6,13 @@ from django.views.generic.edit import (
 from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 
+from dwclasses import utils
 from dwclasses.forms import (
     ChoiceForm, CompendiumSectionForm, CombineForm, CompendiumClassForm,
     SectionForm, NewCharacterForm)
 from dwclasses.models import (
     CombinedClass, CompendiumClass, CompletedCharacter, Section,
     Selection, CompendiumSection)
-from dwclasses.utils import populate_sections
 from nav.models import LoginRequiredMixin
 
 
@@ -61,11 +61,11 @@ class CreateCompendiumClassView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         new_obj = form.save(commit=False)
-        new_obj.user = user=self.request.user
+        new_obj.user = self.request.user
         new_obj.save()
         self.object = new_obj
-#        if form.cleaned_data['use_dw_defaults']:
-#            populate_sections(new_obj)
+        if form.cleaned_data['use_dw_defaults']:
+            utils.populate_sections(new_obj)
         return HttpResponseRedirect(self.get_success_url())
 
 

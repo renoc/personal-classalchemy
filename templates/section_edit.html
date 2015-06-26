@@ -13,7 +13,7 @@
     <span class="half-width">
         <p>
         Used in classes:
-        {% for comp in form.instance.base_ccobj_set.all %}
+        {% for comp in form.instance.compendiumclass_set.all %}
             <b>{{ comp.form_name }}{% if not forloop.last %},{% endif %}</b>
         {% endfor %}
         </p>

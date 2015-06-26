@@ -8,6 +8,10 @@
     {% block h1 %}<h1>Customize {{ object.form_name }}</h1>{% endblock h1 %}
 
 {% block content %}
+<div>
+    <a href="/compendiumclasses/" class="button grey">Return to Compendium List</a>
+</div>
+<br />
 <form method="post">
     {% csrf_token %}
     <div class="fieldWrapper">
@@ -32,7 +36,7 @@
 </form>
 <hr />
 
-{% for choice_section in compendium_class.choicesection_set.all %}
+{% for choice_section in compendium_class.compendiumsection_set.all %}
     <div class="compendium-section">
         <span class="half-width">
         {% with choice_section.base_choice as section %}
@@ -51,7 +55,7 @@
         </span>
         <span class="half-width">
             <ul>
-            {% for choice in choice_section.choice_set.all %}
+            {% for choice in choice_section.selection_set.all %}
                 <li>{{ choice.text }}</li>
             {% endfor %}
             </ul>
