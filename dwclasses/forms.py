@@ -1,7 +1,8 @@
 from django.forms.fields import BooleanField, CharField
 from django.forms.forms import Form
-from django.forms.models import ModelForm, ModelMultipleChoiceField
-from django.forms.widgets import CheckboxSelectMultiple
+from django.forms.models import (
+    ModelForm, ModelChoiceField, ModelMultipleChoiceField)
+from django.forms.widgets import CheckboxSelectMultiple, Textarea
 from extra_views import InlineFormSet
 
 from dwclasses.models import (
@@ -78,11 +79,19 @@ class NewCharacterForm(Form):
     def create_section_field(self, name, section, queryset):
         queryset = queryset.filter(
             choice_section__base_choice=section).order_by('text')
-        self.fields[name] = ChoiceChoice(
-            queryset=queryset, help_text=section.instructions)
+        if section.field_type is Section.TEXT:
+            self.fields[name] = CharField(
+                help_text=section.instructions, required=False,
+                initial='\n\n'.join(queryset.values_list('text', flat=True)))
+            self.fields[name].widget = Textarea()
+            self.fields[name].widget.attrs.update(
+                {'class':'combo-text', 'read-only':True})
+        else:
+            self.fields[name] = ChoiceChoice(
+                queryset=queryset, help_text=section.instructions)
+            self.fields[name].widget = CheckboxSelectMultiple(
+                choices=self.fields[name].choices)
         self.fields[name].label = name
-        self.fields[name].widget = CheckboxSelectMultiple(
-            choices=self.fields[name].choices)
 
     def get_sections(self, user, compendiums):
         return Section.objects.filter(
@@ -95,7 +104,11 @@ class NewCharacterForm(Form):
         name = self.cleaned_data.pop('form_name')
         for section in self.cleaned_data.keys():
             character[section] = []
-            for choice in self.cleaned_data[section]:
-                character[section].append(choice.text)
+            data = self.cleaned_data[section]
+            if type(data) == unicode:
+                character[section].append(data)
+            else:
+                for choice in self.cleaned_data[section]:
+                    character[section].append(choice.text)
         return CompletedCharacter.objects.create(
             form_name=name, form_data=character, user=user)

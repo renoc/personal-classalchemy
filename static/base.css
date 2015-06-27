@@ -139,12 +139,24 @@ label { display: block; }
     color: #000;
 }
 
-.compendium-section {
-    overflow: auto;
-}
 .half-width {
     float: left;
     margin: 0;
     min-width: 310px;
     width: 50%;
 }
+.compendium-section { overflow: auto; }
+.character ul { list-style-type: none; }
+.character input[type='checkbox'] {
+    margin-left: -1.5em;
+}
+.combo-text {
+    color: inherit;
+    background-color: inherit;
+    border-width: 0px;
+    font: inherit;
+    min-height: 3em;
+    resize: vertical;
+    width: -moz-available;
+}
+pre { font: inherit; }
