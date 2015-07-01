@@ -1,6 +1,9 @@
 from django import http
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.forms.fields import CharField
+from django import forms
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.views.generic.edit import (
@@ -94,6 +97,7 @@ class CompendiumClass_ModelTests(TestCase):
 
 
 class Compendium_View_Tests(TestCase):
+
     def setUp(self):
         self.moxx = mox.Mox()
 
@@ -115,6 +119,8 @@ class Compendium_View_Tests(TestCase):
         self.moxx.StubOutWithMock(utils, 'populate_sections')
         self.moxx.StubOutWithMock(CreateCompendiumClassView, 'get_success_url')
         CreateCompendiumClassView.get_success_url().AndReturn(None)
+        self.moxx.StubOutWithMock(messages, 'success')
+        messages.success(view.request, mox.IsA(unicode)).AndReturn(None)
 
         self.assertFalse(CompendiumClass.objects.all().exists())
 
@@ -136,6 +142,8 @@ class Compendium_View_Tests(TestCase):
         utils.populate_sections(obj).AndReturn(None)
         self.moxx.StubOutWithMock(CreateCompendiumClassView, 'get_success_url')
         CreateCompendiumClassView.get_success_url().AndReturn(None)
+        self.moxx.StubOutWithMock(messages, 'success')
+        messages.success(view.request, mox.IsA(unicode)).AndReturn(None)
 
         self.assertFalse(CompendiumClass.objects.all().exists())
 
@@ -161,8 +169,17 @@ class Compendium_View_Tests(TestCase):
 
     def test_edit_compendium_class_success_url(self):
         view = EditCompendiumClassView()
+        view.request = ''
         view.object = CompendiumClass(form_name='testcc', id=99)
-        self.assertTrue(view.get_success_url(), "/compendiumclasses/99")
+
+        self.moxx.StubOutWithMock(messages, 'success')
+        messages.success(view.request, mox.IsA(str)).AndReturn(None)
+
+        self.moxx.ReplayAll()
+        url = view.get_success_url()
+        self.moxx.VerifyAll()
+
+        self.assertTrue(url, "/compendiumclasses/99")
 
 
 class Section_View_Tests(TestCase):
@@ -242,6 +259,8 @@ class Section_View_Tests(TestCase):
         SectionForm.save(commit=False).AndReturn(sec)
         self.moxx.StubOutWithMock(CreateSectionView, 'get_success_url')
         CreateSectionView.get_success_url().AndReturn(None)
+        self.moxx.StubOutWithMock(messages, 'success')
+        messages.success(view.request, mox.IsA(unicode)).AndReturn(None)
 
         self.assertFalse(CompendiumSection.objects.all().exists())
 
@@ -320,6 +339,8 @@ class Section_View_Tests(TestCase):
 
         self.moxx.StubOutWithMock(UpdateWithInlinesView, 'get_success_url')
         UpdateWithInlinesView.get_success_url().AndReturn(None)
+        self.moxx.StubOutWithMock(messages, 'success')
+        messages.success(view.request, mox.IsA(unicode)).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_success_url()
@@ -339,6 +360,8 @@ class Section_View_Tests(TestCase):
         RemoveSectionView.get_compendium_class().AndReturn(comp)
         self.moxx.StubOutWithMock(RemoveSectionView, 'get_section')
         RemoveSectionView.get_section().AndReturn(sec)
+        self.moxx.StubOutWithMock(messages, 'warning')
+        messages.warning(view.request, mox.IsA(unicode)).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_redirect_url()
@@ -371,6 +394,8 @@ class Section_View_Tests(TestCase):
         LinkSectionView.get_compendium_class().AndReturn(comp)
         self.moxx.StubOutWithMock(LinkSectionView, 'get_section')
         LinkSectionView.get_section().AndReturn(sec)
+        self.moxx.StubOutWithMock(messages, 'success')
+        messages.success(view.request, mox.IsA(unicode)).AndReturn(None)
 
         self.moxx.ReplayAll()
         view.get_redirect_url()
@@ -489,7 +514,8 @@ class Character_View_Tests(TestCase):
 
     def test_character_form_init_cross(self):
         sect = mommy.make(
-            Section, field_name='section', cross_combine=True, field_type=0)
+            Section, field_name='section', cross_combine=True,
+            field_type=Section.MULTIPLE)
         comp1 = mommy.make(CompendiumClass, form_name='test_compendium')
         cs = mommy.make(CompendiumSection, base_ccobj=comp1, base_choice=sect)
         mommy.make(Selection, text='test_choice', choice_section=cs)
@@ -503,7 +529,8 @@ class Character_View_Tests(TestCase):
 
     def test_character_form_init_uncross(self):
         sect = mommy.make(
-            Section, field_name='section', cross_combine=False, field_type=0)
+            Section, field_name='section', cross_combine=False,
+            field_type=Section.MULTIPLE)
         comp1 = mommy.make(CompendiumClass, form_name='test_compendium')
         cs = mommy.make(CompendiumSection, base_ccobj=comp1, base_choice=sect)
         mommy.make(Selection, text='test_choice', choice_section=cs)
@@ -536,20 +563,6 @@ class Character_View_Tests(TestCase):
         self.moxx.VerifyAll()
 
         # proper mocked functions called
-
-    def test_character_form_save(self):
-        choice = mommy.make(Selection, text='steak')
-        combined = mommy.make(
-            CombinedClass, included_forms=[choice.choice_section.base_ccobj])
-        kwargs = {'combined_class':combined}
-        form = NewCharacterForm(**kwargs)
-        form.cleaned_data = {'form_name': 'testcc', 'entree': [choice]}
-
-        self.assertFalse(CompletedCharacter.objects.all().exists())
-
-        form.save(**kwargs)
-
-        self.assertTrue(CompletedCharacter.objects.all().exists())
 
     def test_create_character_get_success_url(self):
         view = NewCharacterView()
@@ -594,6 +607,67 @@ class Section_Type_by_Form_Tests(TestCase):
         self.assertTrue(CompletedCharacter.objects.all().exists())
         self.assertEqual(
             CompletedCharacter.objects.get().form_data['section'][0], 'preset')
+
+    def test_single_save(self):
+        comp1 = mommy.make(CompendiumClass, form_name='test_compendium')
+        combined = mommy.make(CombinedClass, included_forms=[comp1])
+        kwargs = {'combined_class': combined}
+
+        sect = mommy.make(
+            Section, field_name='section', field_type=Section.SINGLE)
+        cs = mommy.make(CompendiumSection, base_ccobj=comp1, base_choice=sect)
+        choice = mommy.make(Selection, text='preset', choice_section=cs)
+        form = NewCharacterForm(**kwargs)
+        form.cleaned_data = {'form_name': 'testcc', 'section': choice}
+
+        self.assertFalse(CompletedCharacter.objects.all().exists())
+
+        form.save(**kwargs)
+
+        self.assertTrue(CompletedCharacter.objects.all().exists())
+        self.assertEqual(
+            CompletedCharacter.objects.get().form_data['section'][0], 'preset')
+
+    def test_description_save(self):
+        comp1 = mommy.make(CompendiumClass, form_name='test_compendium')
+        combined = mommy.make(CombinedClass, included_forms=[comp1])
+        kwargs = {'combined_class': combined}
+
+        sect = mommy.make(
+            Section, field_name='section', field_type=Section.DESCRIPTION)
+        cs = mommy.make(CompendiumSection, base_ccobj=comp1, base_choice=sect)
+        choice = mommy.make(Selection, text='preset', choice_section=cs)
+        form = NewCharacterForm(**kwargs)
+        form.cleaned_data = {'form_name': 'testcc', 'section': ''}
+
+        self.assertFalse(CompletedCharacter.objects.all().exists())
+
+        form.save(**kwargs)
+
+        self.assertTrue(CompletedCharacter.objects.all().exists())
+        self.assertFalse(
+            'section' in CompletedCharacter.objects.get().form_data.keys())
+
+    def test_multiple_save(self):
+        comp1 = mommy.make(CompendiumClass, form_name='test_compendium')
+        combined = mommy.make(CombinedClass, included_forms=[comp1])
+        kwargs = {'combined_class': combined}
+
+        sect = mommy.make(
+            Section, field_name='section', field_type=Section.MULTIPLE)
+        cs = mommy.make(CompendiumSection, base_ccobj=comp1, base_choice=sect)
+        choice = mommy.make(Selection, text='test_choice', choice_section=cs)
+        form = NewCharacterForm(**kwargs)
+        form.cleaned_data = {'form_name': 'testcc', 'section': [choice]}
+
+        self.assertFalse(CompletedCharacter.objects.all().exists())
+
+        form.save(**kwargs)
+
+        self.assertTrue(CompletedCharacter.objects.all().exists())
+        self.assertEqual(
+            CompletedCharacter.objects.get().form_data['section'][0],
+            choice.text)
 
 
 class Utility_Tests(TestCase):

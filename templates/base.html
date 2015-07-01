@@ -28,14 +28,16 @@
 {% endif %}
 </div>
 {% endblock headermenu %}
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% block h1 %}<h1>Hello Dungeon World</h1>{% endblock h1 %}
-{% block content %}
-{% endblock content %}
+<div class="mid-body">
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% block h1 %}<h1>Hello Dungeon World</h1>{% endblock h1 %}
+    {% block content %}
+    {% endblock content %}
+</div>
 </body></html>

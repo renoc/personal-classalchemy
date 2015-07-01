@@ -5,7 +5,7 @@
         <link rel="canonical" href="http://classalchemy.pythonanywhere.com/" />
         <title>Class Alchemy Homepage</title>
     {% endblock html-head %}
-    {% block h1 %}<h1 class="high-top"><img id="tricon" src="/static/tricon.png" />Class Alchemy</h1>{% endblock h1 %}
+
 
 {% block headermenu %}
     {{ block.super }}
@@ -15,6 +15,13 @@
         </div>
     {% endif %}
 {% endblock headermenu %}
+
+
+{% block h1 %}
+    <h1{% if not user.is_authenticated %} class="high-top"{% endif %}>
+        <img id="tricon" src="/static/tricon.png" />Class Alchemy</h1>
+{% endblock h1 %}
+
 
 {% block content %}
 <p>

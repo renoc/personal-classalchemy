@@ -38,6 +38,7 @@ THROUGH_MODEL = 'dwclasses.CompendiumSection'
 # Replace in local_settings for developement
 DEBUG_APPS = ()
 
+# Order is important?
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

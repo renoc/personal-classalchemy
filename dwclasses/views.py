@@ -1,4 +1,5 @@
 from django import http
+from django.contrib import messages
 from django.views.generic.base import RedirectView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (
@@ -64,6 +65,8 @@ class CreateCompendiumClassView(LoginRequiredMixin, CreateView):
         new_obj.user = self.request.user
         new_obj.save()
         self.object = new_obj
+        messages.success(
+            self.request, '%s Class Created.' % new_obj.form_name)
         if form.cleaned_data['use_dw_defaults']:
             utils.populate_sections(new_obj)
         return http.HttpResponseRedirect(self.get_success_url())
@@ -77,6 +80,8 @@ class EditCompendiumClassView(LoginRequiredMixin, SectionMixin, UpdateView):
         return self.get_compendium_class()
 
     def get_success_url(self):
+        messages.success(
+            self.request, '%s Class Updated.' % self.object.form_name)
         id = self.object.id
         self.success_url = "/compendiumclasses/%s" % id
         return super(EditCompendiumClassView, self).get_success_url()
@@ -97,6 +102,8 @@ class CreateSectionView(LoginRequiredMixin, SectionMixin, CreateView):
         new_obj = form.save(commit=False)
         new_obj.user = user=self.request.user
         new_obj.save()
+        messages.success(
+            self.request, '%s Section Created.' % new_obj.field_name)
         self.object = new_obj
         CompendiumSection.objects.create(
             base_choice=new_obj, base_ccobj=compendium_class)
@@ -129,6 +136,8 @@ class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
             base_ccobj=self.get_compendium_class())
 
     def get_success_url(self):
+        messages.success(
+            self.request, '%s Section Updated.' % self.object.field_name)
         id = self.kwargs.get('cc_id')
         self.success_url = "/compendiumclasses/%s/edit_section/%s" % (
             id, self.object.id)
@@ -141,6 +150,8 @@ class RemoveSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         comp = self.get_compendium_class()
         sect = self.get_section()
+        messages.warning(
+            self.request, '%s Section Removed!' % sect.field_name)
         CompendiumSection.objects.get(base_ccobj=comp, base_choice=sect).delete()
         return "/compendiumclasses/%s" % comp.id
 
@@ -155,6 +166,8 @@ class LinkSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         comp = self.get_compendium_class()
         sect = self.get_section()
+        messages.success(
+            self.request, '%s Section Added.' % sect.field_name)
         CompendiumSection.objects.create(base_ccobj=comp, base_choice=sect)
         return "/compendiumclasses/%s" % comp.id
 

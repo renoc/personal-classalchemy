@@ -15,15 +15,19 @@ body {
     font-family: Verdana, sans-serif;
     margin: 2px 5px;
 }
+.mid-body {
+    margin: 0px auto;
+    max-width: 1200px;
+}
 #tricon { margin: -50px 15px -10px -15px; }
 h1 {
     color: #FFF;
     background: #000;
-    display: inline-block;
     font-family: Georgia, serif;
     font-size: xx-large;
     font-variant: small-caps;
     padding: 0.2em 1em;
+    text-align: center;
 }
 h2 { font-size: x-large; }
 h3 { font-size: large; }
@@ -113,22 +117,22 @@ label { display: block; }
     padding: 6px;
     text-decoration: None
 }
-.green {
+.green, .success {
     background: #6F6;
     border-color: #090;
     color: #000;
 }
-.blue {
+.blue, .info {
     background: #66F;
     border-color: #009;
     color: #FFF;
 }
-.yellow {
+.yellow, .warning {
     background: #FF6;
     border-color: #990;
     color: #000;
 }
-.red {
+.red, .error {
     background: #F66;
     border-color: #900;
     color: #000;
@@ -147,6 +151,12 @@ label { display: block; }
 }
 .compendium-section { overflow: auto; }
 .character ul { list-style-type: none; }
+ul.messages {
+    list-style-type: none;
+    margin: 1em 1em 0 1em;
+    padding: 0em;
+}
+ul.messages li { padding: 0.5em; }
 .character input[type='checkbox'] {
     margin-left: -1.5em;
 }
@@ -155,8 +165,12 @@ label { display: block; }
     background-color: inherit;
     border-width: 0px;
     font: inherit;
+    height: 6em;
     min-height: 3em;
     resize: vertical;
     width: -moz-available;
 }
 pre { font: inherit; }
+input[type="radio"][value=""]{
+    display: None;
+}
