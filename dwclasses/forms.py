@@ -5,6 +5,7 @@ from django.forms.models import (
 from django.forms.widgets import CheckboxSelectMultiple, RadioSelect, Textarea
 from extra_views import InlineFormSet
 
+from combinedchoices.forms import ReadyForm
 from dwclasses.models import (
     CompletedCharacter, CompendiumClass, CombinedClass, Section,
     CompendiumSection, Selection)
@@ -62,7 +63,7 @@ class CombineForm(ModelForm):
         self.fields['included_forms'].queryset = user_compendiums
 
 
-class NewCharacterForm(Form):
+class NewCharacterForm(ReadyForm):
     form_name = CharField(label='Character Name')
 
     def __init__(self, *args, **kwargs):
@@ -70,7 +71,7 @@ class NewCharacterForm(Form):
         user = combined_class.user
         super(NewCharacterForm, self).__init__(*args, **kwargs)
         compendiums = combined_class.included_forms.filter(user=user)
-        for section in self.get_sections(user, compendiums):
+        for section in self.get_sections(compendiums, user=user):
             if section.cross_combine:
                 name = section.field_name
                 queryset = Selection.objects.filter(
@@ -110,10 +111,6 @@ class NewCharacterForm(Form):
             self.fields[name].widget = CheckboxSelectMultiple(
                 choices=self.fields[name].choices)
         self.fields[name].label = name
-
-    def get_sections(self, user, compendiums):
-        return Section.objects.filter(
-            compendiumsection__base_ccobj__in=compendiums, user=user)
 
     def save(self, *args, **kwargs):
         combined_class = kwargs.pop('combined_class')
