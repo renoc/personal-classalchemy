@@ -212,12 +212,13 @@ class NewCharacterView(LoginRequiredMixin, UserModelMixin, FormView):
     template_name = "character_new.html"
 
     def form_valid(self, form):
-        self.object = form.save(**self.get_form_kwargs())
+        self.object = form.save()
         return http.HttpResponseRedirect(self.get_success_url())
 
     def get_form_kwargs(self):
         kwargs = super(NewCharacterView, self).get_form_kwargs()
-        kwargs['combined_class'] = self.get_object()
+        kwargs['ready_class'] = self.get_object()
+        kwargs['user'] = self.request.user
         return kwargs
 
     def get_success_url(self):
