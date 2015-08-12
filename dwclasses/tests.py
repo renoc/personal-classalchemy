@@ -1,3 +1,4 @@
+from combinedchoices.models import CompletedCCO
 from django import http
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -20,8 +21,7 @@ from dwclasses.forms import (
     CompendiumClassForm, SectionForm, CompendiumSectionForm, ChoiceForm,
     CombineForm, NewCharacterForm)
 from dwclasses.models import (
-    CombinedClass, CompendiumClass, CompletedCharacter, Section,
-    CompendiumSection, Selection)
+    CombinedClass, CompendiumClass, Section, CompendiumSection, Selection)
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
@@ -46,12 +46,6 @@ class Unicode_Tests(TestCase):
 
     def test_CompendiumClass(self):
         mod = CompendiumClass(form_name='testuni')
-        self.assertEqual('testuni', '%s' % mod)
-        mod.user = mommy.make(User, username='testuser')
-        self.assertEqual('testuser - testuni', '%s' % mod)
-
-    def test_CompletedCharacter(self):
-        mod = CompletedCharacter(form_name='testuni')
         self.assertEqual('testuni', '%s' % mod)
         mod.user = mommy.make(User, username='testuser')
         self.assertEqual('testuser - testuni', '%s' % mod)
@@ -536,7 +530,7 @@ class Character_View_Tests(TestCase):
 
     def test_create_character_get_success_url(self):
         view = NewCharacterView()
-        view.object = CompletedCharacter(form_name='testcc', id=99)
+        view.object = CompletedCCO(form_name='testcc', id=99)
         self.assertTrue(view.get_success_url(), "/characters/99")
 
 

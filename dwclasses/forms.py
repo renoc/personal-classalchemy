@@ -7,8 +7,7 @@ from extra_views import InlineFormSet
 
 from combinedchoices.forms import ReadyForm
 from dwclasses.models import (
-    CompletedCharacter, CompendiumClass, CombinedClass, Section,
-    CompendiumSection, Selection)
+    CompendiumClass, CombinedClass, Section, CompendiumSection, Selection)
 
 
 class ChoiceForm(InlineFormSet):

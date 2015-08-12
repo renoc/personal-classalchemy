@@ -4,8 +4,7 @@ from django.contrib.auth.models import User
 
 from config.models import UserModelMixin
 from combinedchoices.models import (
-    BaseCCObj, BaseChoice, CompletedCombinedObj, ReadyCombinedObj,
-    ChoiceSection, Choice)
+    BaseCCObj, BaseChoice, ReadyCombinedObj, ChoiceSection, Choice)
 
 
 class Section(UserModelMixin, BaseChoice):
@@ -61,12 +60,3 @@ class CombinedClass(UserModelMixin, ReadyCombinedObj):
     @property
     def name(self):
         return self.form_name
-
-
-class CompletedCharacter(UserModelMixin, CompletedCombinedObj):
-
-    def __unicode__(self):
-        if not self.user:
-            return super(CompletedCharacter, self).__unicode__()
-        else:
-            return '%s - %s' % (self.user.username, self.form_name)

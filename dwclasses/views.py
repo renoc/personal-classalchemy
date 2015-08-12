@@ -1,3 +1,4 @@
+from combinedchoices.models import CompletedCCO
 from django import http
 from django.contrib import messages
 from django.views.generic.base import RedirectView
@@ -12,8 +13,7 @@ from dwclasses.forms import (
     ChoiceForm, CompendiumSectionForm, CombineForm, CompendiumClassForm,
     SectionForm, NewCharacterForm)
 from dwclasses.models import (
-    CombinedClass, CompendiumClass, CompletedCharacter, Section,
-    Selection, CompendiumSection)
+    CombinedClass, CompendiumClass, Section, Selection, CompendiumSection)
 from nav.models import LoginRequiredMixin
 
 
@@ -227,10 +227,10 @@ class NewCharacterView(LoginRequiredMixin, UserModelMixin, FormView):
 
 
 class ViewCharacterView(LoginRequiredMixin, UserModelMixin, DetailView):
-    model = CompletedCharacter
+    model = CompletedCCO
     template_name = "character_view.html"
 
 
 class ListCharacterView(LoginRequiredMixin, UserModelMixin, ListView):
-    model = CompletedCharacter
+    model = CompletedCCO
     template_name = "character_list.html"

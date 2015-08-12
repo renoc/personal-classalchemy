@@ -2,8 +2,7 @@ from django.contrib import admin
 from combinedchoices.admin import (
     BaseCCObjAdmin, ChoiceSectionAdmin, ChoiceAdmin)
 from dwclasses.models import (
-    Section, CompendiumClass, CompletedCharacter, CombinedClass,
-    CompendiumSection, Selection)
+    Section, CompendiumClass, CombinedClass, CompendiumSection, Selection)
 
 
 class CompendiumClassAdmin(BaseCCObjAdmin):
@@ -27,5 +26,4 @@ class CompendiumSectionAdmin(ChoiceSectionAdmin):
 admin.site.register(Section, SectionAdmin)
 admin.site.register(CompendiumClass, CompendiumClassAdmin)
 admin.site.register(CompendiumSection, CompendiumSectionAdmin)
-admin.site.register(CompletedCharacter)
 admin.site.register(CombinedClass)
