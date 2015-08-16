@@ -40,7 +40,7 @@
 {% for choice_section in compendium_class.choicesection_set.all %}
     <div class="compendium-section">
         <span class="half-width">
-        {% with choice_section.base_choice as section %}
+        {% with choice_section.section as section %}
             <div class="blackbar">
                 <a href="/compendiumclasses/{{ compendium_class.id }}/remove_section/{{ section.id }}"
                     class="align-right button red">Remove</a>
@@ -56,7 +56,7 @@
         </span>
         <span class="half-width">
             <ul>
-            {% for choice in choice_section.selection_set.all %}
+            {% for choice in choice_section.choice_set.all %}
                 <li>{{ choice.text }}</li>
             {% endfor %}
             </ul>

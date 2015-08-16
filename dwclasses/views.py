@@ -106,7 +106,7 @@ class CreateSectionView(LoginRequiredMixin, SectionMixin, CreateView):
             self.request, '%s Section Created.' % new_obj.field_name)
         self.object = new_obj
         ChoiceSection.objects.create(
-            base_choice=new_obj, base_ccobj=compendium_class)
+            section=new_obj, basecco=compendium_class)
         return http.HttpResponseRedirect(self.get_success_url())
 
 
@@ -122,7 +122,7 @@ class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
         if not form_class == ChoiceSectionForm:
             return super(EditSectionInlineView, self).get_form(form_class)
         kwargs = self.get_form_kwargs()
-        kwargs['instance'] = self.object.base_choice
+        kwargs['instance'] = self.object.section
         return SectionForm(**kwargs)
 
     def construct_inlines(self):
@@ -132,8 +132,8 @@ class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
 
     def get_object(self):
         return ChoiceSection.objects.get(
-            base_choice=self.get_section(),
-            base_ccobj=self.get_compendium_class())
+            section=self.get_section(),
+            basecco=self.get_compendium_class())
 
     def get_success_url(self):
         messages.success(
@@ -152,7 +152,7 @@ class RemoveSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
         sect = self.get_section()
         messages.warning(
             self.request, '%s Section Removed!' % sect.field_name)
-        ChoiceSection.objects.get(base_ccobj=comp, base_choice=sect).delete()
+        ChoiceSection.objects.get(basecco=comp, section=sect).delete()
         return "/compendiumclasses/%s" % comp.id
 
 
@@ -168,7 +168,7 @@ class LinkSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
         sect = self.get_section()
         messages.success(
             self.request, '%s Section Added.' % sect.field_name)
-        ChoiceSection.objects.create(base_ccobj=comp, base_choice=sect)
+        ChoiceSection.objects.create(basecco=comp, section=sect)
         return "/compendiumclasses/%s" % comp.id
 
 

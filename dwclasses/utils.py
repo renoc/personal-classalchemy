@@ -15,12 +15,12 @@ SECTIONS = [
         'cross_combine': False, 'field_type': Section.MULTIPLE,
         'instructions': 'Pay attention to number of selections'}],
     ['start', 'Starting Moves', {
-        'cross_combine': True, 'field_type': Section.TEXT}],
+        'cross_combine': True, 'field_type': Section.DESCRIPTION}],
     ['2-5', 'Advanced Moves 2-5', {
-        'cross_combine': True, 'field_type': Section.TEXT,
+        'cross_combine': True, 'field_type': Section.DESCRIPTION,
         'instructions': 'Choose one move each time you gain a level 2-5'}],
     ['6-10', 'Advanced Moves 6-10', {
-        'cross_combine': True, 'field_type': Section.TEXT,
+        'cross_combine': True, 'field_type': Section.DESCRIPTION,
         'instructions': 'Choose one move each time you gain a level 6-10'}],
 ]
 
@@ -43,7 +43,7 @@ def populate_sections(compendium, sections=SECTIONS):
     for section_def in sections:
         section = get_section(section_def, user=user)
         choice_section, _ = ChoiceSection.objects.get_or_create(
-            base_choice=section, base_ccobj=compendium)
+            section=section, basecco=compendium)
         if 'Advanced' in section.field_name:
             move_name = 'Worldy\n'
             if '6-10' in section.field_name:

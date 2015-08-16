@@ -220,7 +220,7 @@ class Section_View_Tests(TestCase):
         view = EditSectionInlineView()
         comp = mommy.make(BaseCCO)
         sec = mommy.make(Section)
-        choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
+        choicef = mommy.make(ChoiceSection, section=sec, basecco=comp)
         view.object = choicef
 
         self.moxx.StubOutWithMock(EditSectionInlineView, 'get_form_kwargs')
@@ -251,7 +251,7 @@ class Section_View_Tests(TestCase):
         view = EditSectionInlineView()
         comp = mommy.make(BaseCCO)
         sec = mommy.make(Section)
-        choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
+        choicef = mommy.make(ChoiceSection, section=sec, basecco=comp)
 
         self.moxx.StubOutWithMock(EditSectionInlineView, 'get_section')
         EditSectionInlineView.get_section().AndReturn(sec)
@@ -285,7 +285,7 @@ class Section_View_Tests(TestCase):
         view = create_view(RemoveSectionView)
         comp = mommy.make(BaseCCO)
         sec = mommy.make(Section)
-        ChoiceSection.objects.create(base_ccobj=comp, base_choice=sec)
+        ChoiceSection.objects.create(basecco=comp, section=sec)
 
         self.assertTrue(ChoiceSection.objects.all().exists())
 
