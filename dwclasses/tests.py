@@ -13,33 +13,26 @@ from extra_views.advanced import UpdateWithInlinesView
 from model_mommy import mommy
 import mox
 
-from combinedchoices.models import Choice, CompletedCCO
-from config.models import UserModelManager
+from combinedchoices.models import (
+    Choice, CompletedCCO, ReadyCCO, UserModelManager)
 from config.tests import create_view
 from dwclasses import utils
 from dwclasses.forms import (
     CompendiumClassForm, SectionForm, CompendiumSectionForm, ChoiceForm,
     CombineForm, NewCharacterForm)
-from dwclasses.models import (
-    CombinedClass, CompendiumClass, Section, CompendiumSection)
+from dwclasses.models import CompendiumClass, Section, CompendiumSection
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
-    EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
-    RemoveSectionView, LinkSectionView, ListCombinedClassesView,
-    CreateCombinedClassView, EditCombinedClassView, NewCharacterView,
-    ViewCharacterView, ListCharacterView)
+    EditCompendiumClassView, EditSectionInlineView,
+    CreateSectionView, RemoveSectionView, LinkSectionView,
+    ListCombinedClassesView, CreateCombinedClassView, EditCombinedClassView,
+    NewCharacterView, ViewCharacterView, ListCharacterView)
 
 
 class Unicode_Tests(TestCase):
 
     def test_Section(self):
         mod = Section(field_name='testuni')
-        self.assertEqual('testuni', '%s' % mod)
-        mod.user = mommy.make(User, username='testuser')
-        self.assertEqual('testuser - testuni', '%s' % mod)
-
-    def test_CombinedClass(self):
-        mod = CombinedClass(form_name='testuni')
         self.assertEqual('testuni', '%s' % mod)
         mod.user = mommy.make(User, username='testuser')
         self.assertEqual('testuser - testuni', '%s' % mod)
@@ -75,7 +68,7 @@ class CompendiumClass_ModelTests(TestCase):
 
     def test_name_property_combined(self):
         testname = 'testname'
-        mod = CombinedClass(form_name=testname)
+        mod = ReadyCCO(form_name=testname)
         self.assertEqual(mod.name, testname)
 
     def test_unlinked_choices(self):
@@ -447,13 +440,13 @@ class Combined_View_Tests(TestCase):
         self.moxx.StubOutWithMock(CreateCombinedClassView, 'get_success_url')
         CreateCombinedClassView.get_success_url().AndReturn(None)
 
-        self.assertFalse(CombinedClass.objects.all().exists())
+        self.assertFalse(ReadyCCO.objects.all().exists())
 
         self.moxx.ReplayAll()
         view.form_valid(form=bine)
         self.moxx.VerifyAll()
 
-        self.assertTrue(CombinedClass.objects.all().exists())
+        self.assertTrue(ReadyCCO.objects.all().exists())
 
     def test_mixin_get_object(self):
         view = create_view(EditCombinedClassView)
@@ -491,7 +484,7 @@ class Character_View_Tests(TestCase):
         self.moxx.VerifyAll()
 
         self.assertEqual(
-            {'ready_class': 'object', 'user': view.request.user}, result)
+            {'ready_obj': 'object', 'user': view.request.user}, result)
 
     def test_new_get_obj(self):
         view = create_view(NewCharacterView)
@@ -509,8 +502,8 @@ class Character_View_Tests(TestCase):
 
     def test_character_form_valid(self):
         view = create_view(NewCharacterView)
-        combined = mommy.make(CombinedClass)
-        kwargs = {'ready_class':combined, 'user':None}
+        combined = mommy.make(ReadyCCO)
+        kwargs = {'ready_obj':combined, 'user':None}
 
         self.moxx.StubOutWithMock(NewCharacterView, 'get_success_url')
         NewCharacterView.get_success_url().AndReturn('/')

@@ -6,9 +6,8 @@ from django.forms.widgets import CheckboxSelectMultiple, RadioSelect, Textarea
 from extra_views import InlineFormSet
 
 from combinedchoices.forms import ReadyForm
-from combinedchoices.models import Choice
-from dwclasses.models import (
-    CompendiumClass, CombinedClass, Section, CompendiumSection)
+from combinedchoices.models import Choice, ReadyCCO
+from dwclasses.models import CompendiumClass, Section, CompendiumSection
 
 
 class ChoiceForm(InlineFormSet):
@@ -38,7 +37,7 @@ class CompendiumSectionForm(ModelForm):
 
 class CombineForm(ModelForm):
     class Meta:
-        model = CombinedClass
+        model = ReadyCCO
         exclude = ('user',)
 
     def __init__(self, *args, **kwargs):

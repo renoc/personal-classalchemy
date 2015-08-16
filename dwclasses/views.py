@@ -8,13 +8,12 @@ from django.views.generic.edit import (
 from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 
-from combinedchoices.models import Choice
+from combinedchoices.models import Choice, ReadyCCO
 from dwclasses import utils
 from dwclasses.forms import (
     ChoiceForm, CompendiumSectionForm, CombineForm, CompendiumClassForm,
     SectionForm, NewCharacterForm)
-from dwclasses.models import (
-    CombinedClass, CompendiumClass, Section, CompendiumSection)
+from dwclasses.models import CompendiumClass, Section, CompendiumSection
 from nav.models import LoginRequiredMixin
 
 
@@ -174,7 +173,7 @@ class LinkSectionView(LoginRequiredMixin, SectionMixin, RedirectView):
 
 
 class ListCombinedClassesView(LoginRequiredMixin, UserModelMixin, ListView):
-    model = CombinedClass
+    model = ReadyCCO
     template_name = "combined_class_list.html"
 
 
@@ -203,13 +202,13 @@ class CreateCombinedClassView(LoginRequiredMixin, CombinedMixin, CreateView):
 
 class EditCombinedClassView(LoginRequiredMixin, CombinedMixin, UserModelMixin,
                             UpdateView):
-    model = CombinedClass
+    model = ReadyCCO
     template_name = "combined_class_create.html"
 
 
 class NewCharacterView(LoginRequiredMixin, UserModelMixin, FormView):
     form_class = NewCharacterForm
-    model = CombinedClass
+    model = ReadyCCO
     template_name = "character_new.html"
 
     def form_valid(self, form):
@@ -218,7 +217,7 @@ class NewCharacterView(LoginRequiredMixin, UserModelMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super(NewCharacterView, self).get_form_kwargs()
-        kwargs['ready_class'] = self.get_object()
+        kwargs['ready_obj'] = self.get_object()
         kwargs['user'] = self.request.user
         return kwargs
 
