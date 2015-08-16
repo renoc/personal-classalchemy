@@ -6,8 +6,8 @@ from django.forms.widgets import CheckboxSelectMultiple, RadioSelect, Textarea
 from extra_views import InlineFormSet
 
 from combinedchoices.forms import ReadyForm
-from combinedchoices.models import Choice, ChoiceSection, ReadyCCO
-from dwclasses.models import CompendiumClass, Section
+from combinedchoices.models import (
+    BaseCCO, Choice, ChoiceSection, ReadyCCO, Section)
 
 
 class ChoiceForm(InlineFormSet):
@@ -19,7 +19,7 @@ class CompendiumClassForm(ModelForm):
         label='Populate with DungeonWorld Data', initial=True, required=False)
 
     class Meta:
-        model = CompendiumClass
+        model = BaseCCO
         fields = ('form_name',)
 
 

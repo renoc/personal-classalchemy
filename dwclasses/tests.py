@@ -14,73 +14,19 @@ from model_mommy import mommy
 import mox
 
 from combinedchoices.models import (
-    Choice, ChoiceSection, CompletedCCO, ReadyCCO, UserModelManager)
+    BaseCCO,
+    Choice, ChoiceSection, CompletedCCO, ReadyCCO, Section, UserModelManager)
 from config.tests import create_view
 from dwclasses import utils
 from dwclasses.forms import (
     CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm,
     CombineForm, NewCharacterForm)
-from dwclasses.models import CompendiumClass, Section
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, EditSectionInlineView,
     CreateSectionView, RemoveSectionView, LinkSectionView,
     ListCombinedClassesView, CreateCombinedClassView, EditCombinedClassView,
     NewCharacterView, ViewCharacterView, ListCharacterView)
-
-
-class Unicode_Tests(TestCase):
-
-    def test_Section(self):
-        mod = Section(field_name='testuni')
-        self.assertEqual('testuni', '%s' % mod)
-        mod.user = mommy.make(User, username='testuser')
-        self.assertEqual('testuser - testuni', '%s' % mod)
-
-    def test_CompendiumClass(self):
-        mod = CompendiumClass(form_name='testuni')
-        self.assertEqual('testuni', '%s' % mod)
-        mod.user = mommy.make(User, username='testuser')
-        self.assertEqual('testuser - testuni', '%s' % mod)
-
-
-class Section_ModelTests(TestCase):
-
-    def test_validate_pass(self):
-        mod = mommy.make(Section, field_name='testuni')
-        mod.save()
-        mod.validate_unique()
-        #No errors raised
-
-    def test_validate_fail(self):
-        mod = mommy.make(Section, field_name='testuni')
-        mod.save()
-        mod = mommy.make(Section, field_name='testuni')
-        self.assertRaises(ValidationError, mod.validate_unique())
-
-
-class CompendiumClass_ModelTests(TestCase):
-
-    def test_name_property(self):
-        testname = 'testname'
-        mod = CompendiumClass(form_name=testname)
-        self.assertEqual(mod.name, testname)
-
-    def test_name_property_combined(self):
-        testname = 'testname'
-        mod = ReadyCCO(form_name=testname)
-        self.assertEqual(mod.name, testname)
-
-    def test_unlinked_choices(self):
-        user = mommy.make(User, username='testuser')
-        tested = mommy.make(CompendiumClass, form_name='tested', user=user)
-        untested = mommy.make(CompendiumClass, form_name='untested', user=user)
-        modin = mommy.make(Section, field_name='in', user=user)
-        modout = mommy.make(Section, field_name='out', user=user)
-        modother = mommy.make(Section, field_name='other')
-        mommy.make(ChoiceSection, base_ccobj=tested, base_choice=modin)
-        mommy.make(ChoiceSection, base_ccobj=untested, base_choice=modout)
-        self.assertEqual(tested.available_sections().get(), modout)
 
 
 class Compendium_View_Tests(TestCase):
@@ -93,7 +39,7 @@ class Compendium_View_Tests(TestCase):
 
     def test_create_compendium_get_success_url(self):
         view = CreateCompendiumClassView()
-        view.object = CompendiumClass(form_name='testcc', id=99)
+        view.object = BaseCCO(form_name='testcc', id=99)
         self.assertTrue(view.get_success_url(), "/compendiumclasses/99")
 
     def test_create_compendium_class_form_valid(self):
@@ -102,26 +48,26 @@ class Compendium_View_Tests(TestCase):
         comp.cleaned_data = {'form_name': 'testcc', 'use_dw_defaults': False}
 
         self.moxx.StubOutWithMock(CompendiumClassForm, 'save')
-        CompendiumClassForm.save(commit=False).AndReturn(CompendiumClass())
+        CompendiumClassForm.save(commit=False).AndReturn(BaseCCO())
         self.moxx.StubOutWithMock(utils, 'populate_sections')
         self.moxx.StubOutWithMock(CreateCompendiumClassView, 'get_success_url')
         CreateCompendiumClassView.get_success_url().AndReturn(None)
         self.moxx.StubOutWithMock(messages, 'success')
         messages.success(view.request, mox.IsA(unicode)).AndReturn(None)
 
-        self.assertFalse(CompendiumClass.objects.all().exists())
+        self.assertFalse(BaseCCO.objects.all().exists())
 
         self.moxx.ReplayAll()
         view.form_valid(form=comp)
         self.moxx.VerifyAll()
 
-        self.assertTrue(CompendiumClass.objects.all().exists())
+        self.assertTrue(BaseCCO.objects.all().exists())
 
     def test_create_compendium_class_form_populate_trigger(self):
         view = create_view(CreateCompendiumClassView)
         comp = CompendiumClassForm()
         comp.cleaned_data = {'form_name': 'testcc', 'use_dw_defaults': True}
-        obj = CompendiumClass()
+        obj = BaseCCO()
 
         self.moxx.StubOutWithMock(CompendiumClassForm, 'save')
         CompendiumClassForm.save(commit=False).AndReturn(obj)
@@ -132,13 +78,13 @@ class Compendium_View_Tests(TestCase):
         self.moxx.StubOutWithMock(messages, 'success')
         messages.success(view.request, mox.IsA(unicode)).AndReturn(None)
 
-        self.assertFalse(CompendiumClass.objects.all().exists())
+        self.assertFalse(BaseCCO.objects.all().exists())
 
         self.moxx.ReplayAll()
         view.form_valid(form=comp)
         self.moxx.VerifyAll()
 
-        self.assertTrue(CompendiumClass.objects.all().exists())
+        self.assertTrue(BaseCCO.objects.all().exists())
 
     def test_edit_compendium_class_get_object(self):
         view = create_view(EditCompendiumClassView)
@@ -157,7 +103,7 @@ class Compendium_View_Tests(TestCase):
     def test_edit_compendium_class_success_url(self):
         view = EditCompendiumClassView()
         view.request = ''
-        view.object = CompendiumClass(form_name='testcc', id=99)
+        view.object = BaseCCO(form_name='testcc', id=99)
 
         self.moxx.StubOutWithMock(messages, 'success')
         messages.success(view.request, mox.IsA(str)).AndReturn(None)
@@ -237,7 +183,7 @@ class Section_View_Tests(TestCase):
     def test_create_section_valid(self):
         view = create_view(CreateSectionView)
         form = SectionForm()
-        comp = mommy.make(CompendiumClass)
+        comp = mommy.make(BaseCCO)
         sec = Section(field_type=0)
 
         self.moxx.StubOutWithMock(CreateSectionView, 'get_compendium_class')
@@ -272,7 +218,7 @@ class Section_View_Tests(TestCase):
 
     def test_edit_section_get_form_mainform(self):
         view = EditSectionInlineView()
-        comp = mommy.make(CompendiumClass)
+        comp = mommy.make(BaseCCO)
         sec = mommy.make(Section)
         choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
         view.object = choicef
@@ -303,7 +249,7 @@ class Section_View_Tests(TestCase):
 
     def test_edit_section_get_object(self):
         view = EditSectionInlineView()
-        comp = mommy.make(CompendiumClass)
+        comp = mommy.make(BaseCCO)
         sec = mommy.make(Section)
         choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
 
@@ -337,7 +283,7 @@ class Section_View_Tests(TestCase):
 
     def test_remove_section(self):
         view = create_view(RemoveSectionView)
-        comp = mommy.make(CompendiumClass)
+        comp = mommy.make(BaseCCO)
         sec = mommy.make(Section)
         ChoiceSection.objects.create(base_ccobj=comp, base_choice=sec)
 
@@ -372,7 +318,7 @@ class Section_View_Tests(TestCase):
 
     def test_link_existing_section(self):
         view = create_view(LinkSectionView)
-        comp = mommy.make(CompendiumClass)
+        comp = mommy.make(BaseCCO)
         sec = mommy.make(Section)
 
         self.assertFalse(ChoiceSection.objects.all().exists())
@@ -546,7 +492,7 @@ class Utility_Tests(TestCase):
         self.assertNotEqual(result, sect)
 
     def test_populate_sections_basic(self):
-        comp = CompendiumClass.objects.create()
+        comp = BaseCCO.objects.create()
         section = ['gear', 'Gear', {'field_type': 0}]
         sect = Section.objects.create(field_type=0)
 
@@ -563,7 +509,7 @@ class Utility_Tests(TestCase):
         self.assertFalse(Choice.objects.all().exists())
 
     def test_populate_sections_advanced(self):
-        comp = CompendiumClass.objects.create()
+        comp = BaseCCO.objects.create()
         section = ['2-5', 'Advanced Moves 2-5', {'field_type': 0}]
         sect = Section.objects.create(
             field_name='Advanced Moves 2-5', field_type=0)
@@ -581,7 +527,7 @@ class Utility_Tests(TestCase):
         self.assertTrue(Choice.objects.all().exists())
 
     def test_populate_sections_advanceder(self):
-        comp = CompendiumClass.objects.create()
+        comp = BaseCCO.objects.create()
         section = ['6-10', 'Advanced Moves 6-10', {'field_type': 0}]
         sect = Section.objects.create(
             field_name='Advanced Moves 6-10', field_type=0)

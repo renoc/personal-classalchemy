@@ -29,11 +29,6 @@ LOCAL_APPS = (
 )
 
 
-# CombinedClass settings
-BASE_MODEL = 'dwclasses.CompendiumClass'
-SECTION_MODEL = 'dwclasses.Section'
-
-
 # Replace in local_settings for developement
 DEBUG_APPS = ()
 

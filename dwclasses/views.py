@@ -8,12 +8,12 @@ from django.views.generic.edit import (
 from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 
-from combinedchoices.models import Choice, ChoiceSection, ReadyCCO
+from combinedchoices.models import (
+    BaseCCO, Choice, ChoiceSection, ReadyCCO, Section)
 from dwclasses import utils
 from dwclasses.forms import (
     ChoiceForm, ChoiceSectionForm, CombineForm, CompendiumClassForm,
     SectionForm, NewCharacterForm)
-from dwclasses.models import CompendiumClass, Section
 from nav.models import LoginRequiredMixin
 
 
@@ -26,7 +26,7 @@ class SectionMixin(object):
 
     def get_compendium_class(self):
         id = self.kwargs.get('cc_id')
-        return CompendiumClass.objects.get_or_404(id=id, user=self.request.user)
+        return BaseCCO.objects.get_or_404(id=id, user=self.request.user)
 
     def get_section(self):
         id = self.kwargs.get('sec_id')
@@ -47,7 +47,7 @@ class UserModelMixin(object):
 
 
 class ListCompendiumClassesView(LoginRequiredMixin, UserModelMixin, ListView):
-    model = CompendiumClass
+    model = BaseCCO
     template_name = "compendium_class_list.html"
 
 
@@ -183,7 +183,7 @@ class CombinedMixin(object):
 
     def get_form_kwargs(self):
         kwargs = super(CombinedMixin, self).get_form_kwargs()
-        kwargs['user_compendiums'] = CompendiumClass.objects.get_user_objects(
+        kwargs['user_compendiums'] = BaseCCO.objects.get_user_objects(
             user=self.request.user)
         return kwargs
 

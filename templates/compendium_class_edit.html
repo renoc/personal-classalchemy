@@ -37,7 +37,7 @@
 </form>
 <hr />
 
-{% for choice_section in compendium_class.compendiumsection_set.all %}
+{% for choice_section in compendium_class.choicesection_set.all %}
     <div class="compendium-section">
         <span class="half-width">
         {% with choice_section.base_choice as section %}

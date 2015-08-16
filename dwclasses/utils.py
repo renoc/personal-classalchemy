@@ -1,5 +1,4 @@
-from combinedchoices.models import Choice, ChoiceSection
-from dwclasses.models import Section
+from combinedchoices.models import Choice, ChoiceSection, Section
 
 
 SECTIONS = [
