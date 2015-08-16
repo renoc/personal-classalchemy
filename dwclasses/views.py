@@ -8,12 +8,13 @@ from django.views.generic.edit import (
 from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 
+from combinedchoices.models import Choice
 from dwclasses import utils
 from dwclasses.forms import (
     ChoiceForm, CompendiumSectionForm, CombineForm, CompendiumClassForm,
     SectionForm, NewCharacterForm)
 from dwclasses.models import (
-    CombinedClass, CompendiumClass, Section, Selection, CompendiumSection)
+    CombinedClass, CompendiumClass, Section, CompendiumSection)
 from nav.models import LoginRequiredMixin
 
 
@@ -114,7 +115,7 @@ class EditSectionInlineView(LoginRequiredMixin, SectionMixin,
                             UpdateWithInlinesView):
     form_class = CompendiumSectionForm
     inlines = [ChoiceForm]
-    inline_model = Selection
+    inline_model = Choice
     model = CompendiumSection
     template_name = "section_edit.html"
 

@@ -2,9 +2,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 
-from config.models import UserModelMixin
 from combinedchoices.models import (
-    BaseCCObj, BaseChoice, ReadyCombinedObj, ChoiceSection, Choice)
+    BaseCCObj, BaseChoice, ReadyCombinedObj, ChoiceSection)
+from config.models import UserModelMixin
 
 
 class Section(UserModelMixin, BaseChoice):
@@ -42,10 +42,6 @@ class CompendiumClass(UserModelMixin, BaseCCObj):
 
 
 class CompendiumSection(ChoiceSection):
-    pass
-
-
-class Selection(Choice):
     pass
 
 

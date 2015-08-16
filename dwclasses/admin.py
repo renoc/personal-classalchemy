@@ -1,8 +1,9 @@
 from django.contrib import admin
+
 from combinedchoices.admin import (
     BaseCCObjAdmin, ChoiceSectionAdmin, ChoiceAdmin)
 from dwclasses.models import (
-    Section, CompendiumClass, CombinedClass, CompendiumSection, Selection)
+    Section, CompendiumClass, CombinedClass, CompendiumSection)
 
 
 class CompendiumClassAdmin(BaseCCObjAdmin):
@@ -14,13 +15,9 @@ class SectionAdmin(BaseCCObjAdmin):
     list_display = ['field_name', 'user']
 
 
-class SelectionAdmin(ChoiceAdmin):
-    model = Selection
-
-
 class CompendiumSectionAdmin(ChoiceSectionAdmin):
     model = CompendiumSection
-    inlines = [SelectionAdmin,]
+    inlines = [ChoiceAdmin,]
 
 
 admin.site.register(Section, SectionAdmin)

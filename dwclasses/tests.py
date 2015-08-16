@@ -1,4 +1,3 @@
-from combinedchoices.models import CompletedCCO
 from django import http
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -14,6 +13,7 @@ from extra_views.advanced import UpdateWithInlinesView
 from model_mommy import mommy
 import mox
 
+from combinedchoices.models import Choice, CompletedCCO
 from config.models import UserModelManager
 from config.tests import create_view
 from dwclasses import utils
@@ -21,7 +21,7 @@ from dwclasses.forms import (
     CompendiumClassForm, SectionForm, CompendiumSectionForm, ChoiceForm,
     CombineForm, NewCharacterForm)
 from dwclasses.models import (
-    CombinedClass, CompendiumClass, Section, CompendiumSection, Selection)
+    CombinedClass, CompendiumClass, Section, CompendiumSection)
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, CreateSectionView, EditSectionInlineView,
@@ -567,7 +567,7 @@ class Utility_Tests(TestCase):
         self.moxx.VerifyAll()
 
         self.assertTrue(comp.compendiumsection_set.exists())
-        self.assertFalse(Selection.objects.all().exists())
+        self.assertFalse(Choice.objects.all().exists())
 
     def test_populate_sections_advanced(self):
         comp = CompendiumClass.objects.create()
@@ -585,7 +585,7 @@ class Utility_Tests(TestCase):
         self.moxx.VerifyAll()
 
         self.assertTrue(comp.compendiumsection_set.exists())
-        self.assertTrue(Selection.objects.all().exists())
+        self.assertTrue(Choice.objects.all().exists())
 
     def test_populate_sections_advanceder(self):
         comp = CompendiumClass.objects.create()
@@ -603,4 +603,4 @@ class Utility_Tests(TestCase):
         self.moxx.VerifyAll()
 
         self.assertTrue(comp.compendiumsection_set.exists())
-        self.assertTrue(Selection.objects.all().exists())
+        self.assertTrue(Choice.objects.all().exists())

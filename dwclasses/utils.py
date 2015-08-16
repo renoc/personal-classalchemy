@@ -1,4 +1,5 @@
-from dwclasses.models import Section, Selection, CompendiumSection
+from combinedchoices.models import Choice
+from dwclasses.models import Section, CompendiumSection
 
 
 SECTIONS = [
@@ -48,5 +49,5 @@ def populate_sections(compendium, sections=SECTIONS):
             move_name = 'Worldy\n'
             if '6-10' in section.field_name:
                 move_name = 'Otherworldy\n'
-            Selection.objects.create(
+            Choice.objects.create(
                 choice_section=choice_section, text='%s%s' % (move_name, move))

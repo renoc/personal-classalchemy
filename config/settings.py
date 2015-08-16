@@ -31,7 +31,6 @@ LOCAL_APPS = (
 
 # CombinedClass settings
 BASE_MODEL = 'dwclasses.CompendiumClass'
-CHOICE_MODEL = 'dwclasses.Selection'
 SECTION_MODEL = 'dwclasses.Section'
 THROUGH_MODEL = 'dwclasses.CompendiumSection'
 
