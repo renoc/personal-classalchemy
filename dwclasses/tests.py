@@ -14,13 +14,13 @@ from model_mommy import mommy
 import mox
 
 from combinedchoices.models import (
-    Choice, CompletedCCO, ReadyCCO, UserModelManager)
+    Choice, ChoiceSection, CompletedCCO, ReadyCCO, UserModelManager)
 from config.tests import create_view
 from dwclasses import utils
 from dwclasses.forms import (
-    CompendiumClassForm, SectionForm, CompendiumSectionForm, ChoiceForm,
+    CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm,
     CombineForm, NewCharacterForm)
-from dwclasses.models import CompendiumClass, Section, CompendiumSection
+from dwclasses.models import CompendiumClass, Section
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, EditSectionInlineView,
@@ -78,8 +78,8 @@ class CompendiumClass_ModelTests(TestCase):
         modin = mommy.make(Section, field_name='in', user=user)
         modout = mommy.make(Section, field_name='out', user=user)
         modother = mommy.make(Section, field_name='other')
-        mommy.make(CompendiumSection, base_ccobj=tested, base_choice=modin)
-        mommy.make(CompendiumSection, base_ccobj=untested, base_choice=modout)
+        mommy.make(ChoiceSection, base_ccobj=tested, base_choice=modin)
+        mommy.make(ChoiceSection, base_ccobj=untested, base_choice=modout)
         self.assertEqual(tested.available_sections().get(), modout)
 
 
@@ -249,13 +249,13 @@ class Section_View_Tests(TestCase):
         self.moxx.StubOutWithMock(messages, 'success')
         messages.success(view.request, mox.IsA(unicode)).AndReturn(None)
 
-        self.assertFalse(CompendiumSection.objects.all().exists())
+        self.assertFalse(ChoiceSection.objects.all().exists())
 
         self.moxx.ReplayAll()
         view.form_valid(form=form)
         self.moxx.VerifyAll()
 
-        self.assertTrue(CompendiumSection.objects.all().exists())
+        self.assertTrue(ChoiceSection.objects.all().exists())
 
     def test_edit_section_get_form_subforms(self):
         view = EditSectionInlineView()
@@ -274,7 +274,7 @@ class Section_View_Tests(TestCase):
         view = EditSectionInlineView()
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        choicef = mommy.make(CompendiumSection, base_choice=sec, base_ccobj=comp)
+        choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
         view.object = choicef
 
         self.moxx.StubOutWithMock(EditSectionInlineView, 'get_form_kwargs')
@@ -282,7 +282,7 @@ class Section_View_Tests(TestCase):
         self.moxx.StubOutWithMock(UpdateWithInlinesView, 'get_form')
 
         self.moxx.ReplayAll()
-        form = view.get_form(CompendiumSectionForm)
+        form = view.get_form(ChoiceSectionForm)
         self.moxx.VerifyAll()
 
         self.assertEqual(type(form), SectionForm)
@@ -305,7 +305,7 @@ class Section_View_Tests(TestCase):
         view = EditSectionInlineView()
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        choicef = mommy.make(CompendiumSection, base_choice=sec, base_ccobj=comp)
+        choicef = mommy.make(ChoiceSection, base_choice=sec, base_ccobj=comp)
 
         self.moxx.StubOutWithMock(EditSectionInlineView, 'get_section')
         EditSectionInlineView.get_section().AndReturn(sec)
@@ -339,9 +339,9 @@ class Section_View_Tests(TestCase):
         view = create_view(RemoveSectionView)
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
-        CompendiumSection.objects.create(base_ccobj=comp, base_choice=sec)
+        ChoiceSection.objects.create(base_ccobj=comp, base_choice=sec)
 
-        self.assertTrue(CompendiumSection.objects.all().exists())
+        self.assertTrue(ChoiceSection.objects.all().exists())
 
         self.moxx.StubOutWithMock(RemoveSectionView, 'get_compendium_class')
         RemoveSectionView.get_compendium_class().AndReturn(comp)
@@ -354,7 +354,7 @@ class Section_View_Tests(TestCase):
         view.get_redirect_url()
         self.moxx.VerifyAll()
 
-        self.assertFalse(CompendiumSection.objects.all().exists())
+        self.assertFalse(ChoiceSection.objects.all().exists())
 
     def test_linksection_getsection(self):
         view = create_view(LinkSectionView)
@@ -375,7 +375,7 @@ class Section_View_Tests(TestCase):
         comp = mommy.make(CompendiumClass)
         sec = mommy.make(Section)
 
-        self.assertFalse(CompendiumSection.objects.all().exists())
+        self.assertFalse(ChoiceSection.objects.all().exists())
 
         self.moxx.StubOutWithMock(LinkSectionView, 'get_compendium_class')
         LinkSectionView.get_compendium_class().AndReturn(comp)
@@ -388,7 +388,7 @@ class Section_View_Tests(TestCase):
         view.get_redirect_url()
         self.moxx.VerifyAll()
 
-        self.assertTrue(CompendiumSection.objects.all().exists())
+        self.assertTrue(ChoiceSection.objects.all().exists())
 
 
 class Combined_View_Tests(TestCase):
@@ -553,13 +553,13 @@ class Utility_Tests(TestCase):
         self.moxx.StubOutWithMock(utils, 'get_section')
         utils.get_section(section, user=None).AndReturn(sect)
 
-        self.assertFalse(comp.compendiumsection_set.exists())
+        self.assertFalse(comp.choicesection_set.exists())
 
         self.moxx.ReplayAll()
         utils.populate_sections(comp, [section])
         self.moxx.VerifyAll()
 
-        self.assertTrue(comp.compendiumsection_set.exists())
+        self.assertTrue(comp.choicesection_set.exists())
         self.assertFalse(Choice.objects.all().exists())
 
     def test_populate_sections_advanced(self):
@@ -571,13 +571,13 @@ class Utility_Tests(TestCase):
         self.moxx.StubOutWithMock(utils, 'get_section')
         utils.get_section(section, user=None).AndReturn(sect)
 
-        self.assertFalse(comp.compendiumsection_set.exists())
+        self.assertFalse(comp.choicesection_set.exists())
 
         self.moxx.ReplayAll()
         utils.populate_sections(comp, [section])
         self.moxx.VerifyAll()
 
-        self.assertTrue(comp.compendiumsection_set.exists())
+        self.assertTrue(comp.choicesection_set.exists())
         self.assertTrue(Choice.objects.all().exists())
 
     def test_populate_sections_advanceder(self):
@@ -589,11 +589,11 @@ class Utility_Tests(TestCase):
         self.moxx.StubOutWithMock(utils, 'get_section')
         utils.get_section(section, user=None).AndReturn(sect)
 
-        self.assertFalse(comp.compendiumsection_set.exists())
+        self.assertFalse(comp.choicesection_set.exists())
 
         self.moxx.ReplayAll()
         utils.populate_sections(comp, [section])
         self.moxx.VerifyAll()
 
-        self.assertTrue(comp.compendiumsection_set.exists())
+        self.assertTrue(comp.choicesection_set.exists())
         self.assertTrue(Choice.objects.all().exists())

@@ -32,7 +32,6 @@ LOCAL_APPS = (
 # CombinedClass settings
 BASE_MODEL = 'dwclasses.CompendiumClass'
 SECTION_MODEL = 'dwclasses.Section'
-THROUGH_MODEL = 'dwclasses.CompendiumSection'
 
 
 # Replace in local_settings for developement

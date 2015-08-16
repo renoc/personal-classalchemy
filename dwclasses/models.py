@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 
-from combinedchoices.models import BaseCCObj, BaseChoice, ChoiceSection, UserModelMixin
+from combinedchoices.models import BaseCCObj, BaseChoice, UserModelMixin
 
 
 class Section(UserModelMixin, BaseChoice):
@@ -37,7 +37,3 @@ class CompendiumClass(UserModelMixin, BaseCCObj):
     def available_sections(self):
         return Section.objects.filter(user=self.user).exclude(
             compendiumclass=self)
-
-
-class CompendiumSection(ChoiceSection):
-    pass

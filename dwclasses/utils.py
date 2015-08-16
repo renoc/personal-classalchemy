@@ -1,5 +1,5 @@
-from combinedchoices.models import Choice
-from dwclasses.models import Section, CompendiumSection
+from combinedchoices.models import Choice, ChoiceSection
+from dwclasses.models import Section
 
 
 SECTIONS = [
@@ -43,7 +43,7 @@ def populate_sections(compendium, sections=SECTIONS):
     user = compendium.user
     for section_def in sections:
         section = get_section(section_def, user=user)
-        choice_section, _ = CompendiumSection.objects.get_or_create(
+        choice_section, _ = ChoiceSection.objects.get_or_create(
             base_choice=section, base_ccobj=compendium)
         if 'Advanced' in section.field_name:
             move_name = 'Worldy\n'
