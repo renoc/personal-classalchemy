@@ -13,14 +13,14 @@ from extra_views.advanced import UpdateWithInlinesView
 from model_mommy import mommy
 import mox
 
+from combinedchoices.forms import (
+    ChoiceForm, ChoiceSectionForm, CombineForm, SectionForm)
 from combinedchoices.models import (
     BaseCCO,
     Choice, ChoiceSection, CompletedCCO, ReadyCCO, Section, UserModelManager)
 from config.tests import create_view
 from dwclasses import utils
-from dwclasses.forms import (
-    CompendiumClassForm, SectionForm, ChoiceSectionForm, ChoiceForm,
-    CombineForm, NewCharacterForm)
+from dwclasses.forms import CompendiumClassForm, NewCharacterForm
 from dwclasses.views import (
     ListCompendiumClassesView, CreateCompendiumClassView,
     EditCompendiumClassView, EditSectionInlineView,
@@ -375,12 +375,12 @@ class Combined_View_Tests(TestCase):
         result = view.get_form_kwargs()
         self.moxx.VerifyAll()
 
-        self.assertEqual({'user_compendiums': 'queryset'}, result)
+        self.assertEqual({'cco_queryset': 'queryset'}, result)
 
 
     def test_create_combined_class_form_valid(self):
         view = create_view(CreateCombinedClassView)
-        bine = CombineForm(user_compendiums=[])
+        bine = CombineForm(cco_queryset=[])
         bine.cleaned_data = {'form_name': 'testcc'}
 
         self.moxx.StubOutWithMock(CreateCombinedClassView, 'get_success_url')
@@ -430,7 +430,7 @@ class Character_View_Tests(TestCase):
         self.moxx.VerifyAll()
 
         self.assertEqual(
-            {'ready_obj': 'object', 'user': view.request.user}, result)
+            {'ready_obj': 'object'}, result)
 
     def test_new_get_obj(self):
         view = create_view(NewCharacterView)
@@ -449,7 +449,7 @@ class Character_View_Tests(TestCase):
     def test_character_form_valid(self):
         view = create_view(NewCharacterView)
         combined = mommy.make(ReadyCCO)
-        kwargs = {'ready_obj':combined, 'user':None}
+        kwargs = {'ready_obj':combined}
 
         self.moxx.StubOutWithMock(NewCharacterView, 'get_success_url')
         NewCharacterView.get_success_url().AndReturn('/')

@@ -8,12 +8,12 @@ from django.views.generic.edit import (
 from django.views.generic.list import ListView
 from extra_views.advanced import UpdateWithInlinesView
 
+from combinedchoices.forms import (
+    ChoiceForm, ChoiceSectionForm, CombineForm, SectionForm)
 from combinedchoices.models import (
     BaseCCO, Choice, ChoiceSection, ReadyCCO, Section)
 from dwclasses import utils
-from dwclasses.forms import (
-    ChoiceForm, ChoiceSectionForm, CombineForm, CompendiumClassForm,
-    SectionForm, NewCharacterForm)
+from dwclasses.forms import CompendiumClassForm, NewCharacterForm
 from nav.models import LoginRequiredMixin
 
 
@@ -183,7 +183,7 @@ class CombinedMixin(object):
 
     def get_form_kwargs(self):
         kwargs = super(CombinedMixin, self).get_form_kwargs()
-        kwargs['user_compendiums'] = BaseCCO.objects.get_user_objects(
+        kwargs['cco_queryset'] = BaseCCO.objects.get_user_objects(
             user=self.request.user)
         return kwargs
 
@@ -193,7 +193,7 @@ class CreateCombinedClassView(LoginRequiredMixin, CombinedMixin, CreateView):
 
     def form_valid(self, form):
         new_obj = form.save(commit=False)
-        new_obj.user = user=self.request.user
+        new_obj.user = user = self.request.user
         new_obj.save()
         form.save_m2m()
         self.object = new_obj
@@ -218,7 +218,6 @@ class NewCharacterView(LoginRequiredMixin, UserModelMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super(NewCharacterView, self).get_form_kwargs()
         kwargs['ready_obj'] = self.get_object()
-        kwargs['user'] = self.request.user
         return kwargs
 
     def get_success_url(self):
