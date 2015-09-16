@@ -16,7 +16,7 @@
             <h2>{{ field.label_tag }}</h2>
         </div>
         {{ field.errors }}
-        <p>{{ field.help_text }}</p>
+        {{ field.help_text|linebreaks }}
         {{ field }}
     </div></span>
     {% endfor %}

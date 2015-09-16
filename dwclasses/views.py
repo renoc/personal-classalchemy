@@ -50,6 +50,13 @@ class ListCompendiumClassesView(LoginRequiredMixin, UserModelMixin, ListView):
     model = BaseCCO
     template_name = "compendium_class_list.html"
 
+    def get_context_data(self, **kwargs):
+        context = super(
+            ListCompendiumClassesView, self).get_context_data(**kwargs)
+        context['default_used'] = BaseCCO.objects.filter(
+            form_name__startswith='Base').exists()
+        return context
+
 
 class CreateCompendiumClassView(LoginRequiredMixin, CreateView):
     form_class = CompendiumClassForm
@@ -70,6 +77,26 @@ class CreateCompendiumClassView(LoginRequiredMixin, CreateView):
         if form.cleaned_data['use_dw_defaults']:
             utils.populate_sections(new_obj)
         return http.HttpResponseRedirect(self.get_success_url())
+
+
+class DefaultCompendiumClassView(LoginRequiredMixin, RedirectView):
+    permanent = False
+
+    def get_redirect_url(self, *args, **kwargs):
+        default, _ = BaseCCO.objects.get_or_create(
+            user=self.request.user, form_name='Base DungeonWorld Class')
+        section = Section.objects.create(
+            cross_combine=True,
+            field_name='Attributes', field_type=Section.NUMBER,
+            min_selects=8, max_selects=18, user=self.request.user,
+            instructions="Assign these scores to your stats:\n 16 (+2), " +
+                         "15 (+1), 13 (+1), 12 (+0), 9 (+0), 8 (-1)")
+        attributes = ChoiceSection.objects.create(
+            basecco=default, section=section)
+        for stat in ['Strength', 'Dexterity', 'Constitution',
+                     'Intelligence', 'Wisdom', 'Charisma']:
+            Choice.objects.create(choice_section=attributes, text=stat)
+        return "/compendiumclasses/%s" % default.id
 
 
 class EditCompendiumClassView(LoginRequiredMixin, SectionMixin, UpdateView):

@@ -18,6 +18,11 @@
 {% else %}
     <p>You have no classes saved.</p>
 {% endif %}
+{% if not default_used %}
+    <p>
+        Suggested ---&gt; <a href="/compendiumclasses/default" class="button green">Create Base DungeonWorld Class</a>
+    </p>
+{% endif %}
     <p>
         <a href="/compendiumclasses/create" class="button green">Create New Compendium Class</a>
     </p>

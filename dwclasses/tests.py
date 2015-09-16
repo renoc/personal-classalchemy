@@ -22,7 +22,8 @@ from config.tests import create_view
 from dwclasses import utils
 from dwclasses.forms import CompendiumClassForm, NewCharacterForm
 from dwclasses.views import (
-    ListCompendiumClassesView, CreateCompendiumClassView,
+    ListCompendiumClassesView,
+    CreateCompendiumClassView, DefaultCompendiumClassView,
     EditCompendiumClassView, EditSectionInlineView,
     CreateSectionView, RemoveSectionView, LinkSectionView,
     ListCombinedClassesView, CreateCombinedClassView, EditCombinedClassView,
@@ -36,6 +37,43 @@ class Compendium_View_Tests(TestCase):
 
     def tearDown(self):
         self.moxx.UnsetStubs()
+
+    def test_list_compendiums_get_context_false(self):
+        view = create_view(ListCompendiumClassesView)
+        BaseCCO.objects.create(form_name='NotBase')
+
+        self.moxx.StubOutWithMock(ListView, 'get_context_data')
+        ListView.get_context_data().AndReturn({})
+
+        self.moxx.ReplayAll()
+        context = view.get_context_data()
+        self.moxx.VerifyAll()
+
+        self.assertFalse(context['default_used'])
+
+    def test_list_compendiums_get_context_true(self):
+        view = create_view(ListCompendiumClassesView)
+        BaseCCO.objects.create(form_name='BaseYes')
+
+        self.moxx.StubOutWithMock(ListView, 'get_context_data')
+        ListView.get_context_data().AndReturn({})
+
+        self.moxx.ReplayAll()
+        context = view.get_context_data()
+        self.moxx.VerifyAll()
+
+        self.assertTrue(context['default_used'])
+
+    def test_create_default_compendium(self):
+        view = create_view(DefaultCompendiumClassView)
+
+        self.assertFalse(Choice.objects.all().exists())
+
+        self.moxx.ReplayAll()
+        view.get_redirect_url()
+        self.moxx.VerifyAll()
+
+        self.assertTrue(Choice.objects.all().exists())
 
     def test_create_compendium_get_success_url(self):
         view = CreateCompendiumClassView()

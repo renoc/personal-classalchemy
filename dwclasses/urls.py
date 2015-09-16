@@ -8,6 +8,8 @@ urlpatterns = [
         views.ListCompendiumClassesView.as_view()),
     url(r'^compendiumclasses/create',
         views.CreateCompendiumClassView.as_view()),
+    url(r'^compendiumclasses/default',
+        views.DefaultCompendiumClassView.as_view()),
     url(r'^compendiumclasses/(?P<cc_id>\d+)/?$',
         views.EditCompendiumClassView.as_view()),
     url(r'^compendiumclasses/(?P<cc_id>\d+)/create_section',
