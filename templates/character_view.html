@@ -13,15 +13,24 @@
 </div>
 <br />
 <div>
-    {% for section, data in object.form_data.items %}
+{% for section, data in object.form_data.items %}
     <span class="half-width{% cycle '' ' align-right' %}"><div class="pad">
         <div class="blackbar">
             <h2>{{ section }}</h2>
         </div>
-        {% for li in data %}
-            <pre>{{ li }}</pre>
+    {% comment %}Hacky type detection{% endcomment %}
+    {% if data.strip %}
+        <pre>{{ data.strip }}</pre>
+    {% elif data.values %}
+        {% for dd, dt in data.items %}
+            <pre>{{ dd.strip }}: {{ dt.strip }}</pre>
         {% endfor %}
+    {% else %}
+        {% for li in data %}
+            <pre>{{ li.strip }}</pre>
+        {% endfor %}
+    {% endif %}
     </div></span>
-    {% endfor %}
+{% endfor %}
 </div>
 {% endblock content %}

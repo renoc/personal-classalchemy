@@ -93,8 +93,8 @@ class DefaultCompendiumClassView(LoginRequiredMixin, RedirectView):
                          "15 (+1), 13 (+1), 12 (+0), 9 (+0), 8 (-1)")
         attributes = ChoiceSection.objects.create(
             basecco=default, section=section)
-        for stat in ['Strength', 'Dexterity', 'Constitution',
-                     'Intelligence', 'Wisdom', 'Charisma']:
+        for stat in ['   Strength', '  Dexterity', ' Constitution',
+                     ' Intelligence', ' Wisdom', 'Charisma']:
             Choice.objects.create(choice_section=attributes, text=stat)
         return "/compendiumclasses/%s" % default.id
 
