@@ -6,9 +6,7 @@ import mox
 
 
 def create_view(viewclass):
-    user = User.objects.create(username='testuser')
-    request = RequestFactory()
-    request.user = user
     view = viewclass()
-    view.request = request
+    view.request = RequestFactory()
+    view.request.user = User.objects.create(username='testuser')
     return view

@@ -1,0 +1,107 @@
+.align-right { float: right !important; }
+.align-left { float: left !important; }
+.half-width {
+    float: left;
+    margin: 0;
+    min-width: 0.1in;
+    width: 50%;
+}
+body {
+    font-family: Verdana, sans-serif;
+    margin: 2px 5px;
+}
+div, span {
+    margin: 0;
+}
+
+.p8x11 {
+    background: #DDD;
+    margin: 0px auto;
+    width: 7.0in;
+    height: 9.25in;
+}
+.white-rounded {
+    background: #FFF;
+    border-radius: 0.1in;
+    padding-top: -1in;
+    width: 100%;
+    height: 100%;
+}
+
+.blackdiv {
+    background-color: #000;
+    color: #FFF;
+    font-size: 0.1in;
+    margin: 0.04in 0;
+    padding: 0.1in;
+    text-align: center;
+    width: -moz-available;
+}
+.align-left > .blackdiv {
+    border-bottom-right-radius: 1in;
+    float: left;
+    padding-right: 0.2in;
+}
+.align-right > .blackdiv {
+    border-top-left-radius: 1in;
+    float: right;
+    padding-left: 0.2in;
+}
+.print-whitebar {
+    background-color: #FFF;
+    color: #000;
+    margin-right: 0.1in;
+    text-align: left;
+}
+.blackspan {
+    background-color: #000;
+    color: #FFF;
+    font-family: Georgia, serif;
+    font-size: 0.2in;
+    padding-right: 0.1in;
+}
+.blank-space {
+    border-bottom: 0.02in solid black;
+    float: left;
+    height: 0.2in;
+    margin: 0 0.05in 0.05in;
+    width: -moz-available;
+}
+
+.stats {
+    float: left;
+    font-family: Georgia, serif;
+    margin: 0;
+    min-width: 0.1in;
+    text-align: center;
+    width: 16.66%;
+}
+.stats > .frame {
+    border: 0.08in black;
+    border-style: none solid none solid;
+    margin: 0 0.04in;
+    padding: 0.3in 0;
+}
+.attribute {
+    font-size: 0.1in;
+}
+.att {
+    font-size: 0.2in;
+}
+
+.third {
+    min-width: 0.1in;
+    width: 33.333%
+}
+.third > .left {
+    border-top-left-radius: 1in;
+    float: right;
+    margin-right: 0.08in;
+    padding-left: 0.2in;
+}
+.third > .right {
+    border-bottom-right-radius: 1in;
+    float: left;
+    margin-left: 0.08in;
+    padding-right: 0.2in;
+}

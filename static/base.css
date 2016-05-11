@@ -35,7 +35,7 @@ input { font-size: 1em; }
 ul {
     margin: 0px auto;
     padding-left: 1.5em;
- }
+}
 dt { margin: 1em 0em 0.5em 0em; }
 label { display: block; }
 .errorlist { background: #F9C; }
