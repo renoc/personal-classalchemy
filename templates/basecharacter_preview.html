@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
-{% block pagetype %} class="print"{% endblock pagetype %}
+{% block pagetype %} class="preview"{% endblock pagetype %}
 
 {% block html-head %}
     <link rel="canonical" href="http://classalchemy.pythonanywhere.com/BaseCharacterSheet" />
@@ -9,9 +9,9 @@
     <link rel="stylesheet" type="text/css" href="{% static "print.css" %}">
 {% endblock html-head %}
 
-{% block headermenu %}{% endblock headermenu %}
 {% block h1 %}{% endblock h1 %}
 
 {% block content %}
+    <a href="/print/BaseCharacterSheet">Print Version</a><br />
     {% include 'basecharacter_text.html' %}
 {% endblock content %}

@@ -1,25 +1,17 @@
-.align-right { float: right !important; }
-.align-left { float: left !important; }
-.half-width {
-    float: left;
-    margin: 0;
-    min-width: 0.1in;
-    width: 50%;
-}
-body {
-    font-family: Verdana, sans-serif;
-    margin: 2px 5px;
-}
 div, span {
     margin: 0;
 }
 
 .p8x11 {
-    background: #DDD;
     margin: 0px auto;
     width: 7.0in;
     height: 9.25in;
 }
+
+.preview .p8x11 {
+    background: #DDD;
+}
+
 .white-rounded {
     background: #FFF;
     border-radius: 0.1in;
@@ -90,6 +82,8 @@ div, span {
 }
 
 .third {
+    float: left;
+    margin: 0;
     min-width: 0.1in;
     width: 33.333%
 }

@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^about', views.About.as_view()),
     url(r'^paq', views.PAQ.as_view()),
     # change to case insensitive
-    url(r'^BaseCharacterSheet', views.BaseCharacterSheet.as_view()),
+    url(r'^BaseCharacterSheet', views.BaseCharacterPreview.as_view()),
+    url(r'^print/BaseCharacterSheet', views.BaseCharacterPrint.as_view()),
 ]
