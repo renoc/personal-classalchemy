@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block pagetype %} class="print"{% endblock pagetype %}
+
+{% block html-head %}
+    <meta name="robots" content="noindex">
+    <title>Class Alchemy - {{ object.class_name }}</title>
+    <link rel="stylesheet" type="text/css" href="{% static "print.css" %}">
+{% endblock html-head %}
+
+{% block headermenu %}{% endblock headermenu %}
+{% block h1 %}{% endblock h1 %}
+
+{% block content %}
+    {% include 'class_create_text.html' %}
+{% endblock content %}

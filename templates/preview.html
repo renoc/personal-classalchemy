@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block pagetype %} class="preview"{% endblock pagetype %}
+
+{% block html-head %}
+    <link rel="canonical" href="http://classalchemy.pythonanywhere.com/BaseCharacterSheet" />
+    <meta name="robots" content="noindex">
+    <title>Character Class Sheet</title>
+    <link rel="stylesheet" type="text/css" href="{% static "print.css" %}">
+{% endblock html-head %}
+
+{% block h1 %}{% endblock h1 %}
+
+{% block content %}
+<span class="inbloc">
+    <a href="/print/{{ object.id }}">Print Version for Character Creation</a>
+    {% include 'class_create_text.html' %}
+</span>
+
+<span class="inbloc">
+    <a href="/print/{{ object.id}}/levelup">Print Version to keep with character sheet</a>
+    {% include 'class_levelup_text.html' %}
+</span>
+</span>
+{% endblock content %}

@@ -20,6 +20,15 @@ div, span {
     height: 100%;
 }
 
+.box {
+    border: 0.02in solid black;
+    margin: 0.04in;
+}
+
+.box > .blackdiv {
+    margin: 0;
+}
+
 .blackdiv {
     background-color: #000;
     color: #FFF;
@@ -28,6 +37,18 @@ div, span {
     padding: 0.1in;
     text-align: center;
     width: -moz-available;
+}
+.whitediv {
+    margin: 0.04in 0;
+    padding: 0 0.1in;
+    width: -moz-available;
+}
+.classname {
+    font-size: 0.3in;
+    text-align: center;
+}
+.text {
+    font-size: 0.12in;
 }
 .align-left > .blackdiv {
     border-bottom-right-radius: 1in;

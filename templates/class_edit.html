@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="dwclass"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Class Edit Page</title>
+    {% endblock html-head %}
+    {% block h1 %}<h1>Customize {{ object.form_name }}</h1>{% endblock h1 %}
+
+{% block content %}
+<div>
+    <a href="/dwclass/" class="button grey">Return to Class List</a>
+</div>
+<br />
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <p>
+        <button type='submit' class="button yellow">Submit Changes</button>
+    </p>
+</form>
+
+{% endblock content %}

@@ -13,7 +13,8 @@ from combinedchoices.forms import (
 from combinedchoices.models import (
     BaseCCO, Choice, ChoiceSection, ReadyCCO, Section)
 from dwclasses import utils
-from dwclasses.forms import CompendiumClassForm, NewCharacterForm
+from dwclasses.forms import CompendiumClassForm, DWClassForm, NewCharacterForm
+from dwclasses.models import DWClass
 from nav.models import LoginRequiredMixin
 
 
@@ -260,3 +261,45 @@ class ViewCharacterView(LoginRequiredMixin, UserModelMixin, DetailView):
 class ListCharacterView(LoginRequiredMixin, UserModelMixin, ListView):
     model = CompletedCCO
     template_name = "character_list.html"
+
+
+class DWClassMixin(LoginRequiredMixin, UserModelMixin, object):
+    model = DWClass
+    form_class = DWClassForm
+    template_name = "class_edit.html"
+
+    def get_success_url(self):
+        messages.success(
+            self.request, '%s Class Updated.' % self.object.class_name)
+        id = self.object.id
+        self.success_url = "/dwclass/%s" % id
+        return super(DWClassMixin, self).get_success_url()
+
+
+class DWClassCreateView(DWClassMixin, CreateView):
+
+    def form_valid(self, form):
+        new_obj = form.save(commit=False)
+        new_obj.user = user = self.request.user
+        new_obj.save()
+        self.object = new_obj
+        return http.HttpResponseRedirect(self.get_success_url())
+
+
+class DWClassEditView(DWClassMixin, UpdateView):
+    pass
+
+
+class DWClassListView(LoginRequiredMixin, UserModelMixin, ListView):
+    model = DWClass
+    template_name = "class_list.html"
+
+
+class DWClassPreView(LoginRequiredMixin, UserModelMixin, DetailView):
+    model = DWClass
+    template_name = "preview.html"
+
+
+class PreviewListView(LoginRequiredMixin, UserModelMixin, ListView):
+    model = DWClass
+    template_name = "preview_list.html"

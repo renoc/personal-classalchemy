@@ -11,10 +11,11 @@
 {% block headermenu %}
 <div class="header">
     <h2><a href="/" id="h2a" class="main">Class Alchemy</a></h2>
+    <span><a href="/about" class="about">About</a></span>
+    <span><a href="/BaseCharacterSheet" class="bchar">Character Sheet</a></span>
 {% if user.is_authenticated %}
-    <span><a href="/compendiumclasses/" class="compendium" rel="nofollow">Compendium Classes</a></span>
-    <span><a href="/combinedclasses/" class="combined" rel="nofollow">Combined Classes</a></span>
-    <span><a href="/characters/" class="character" rel="nofollow">Characters</a></span>
+    <span><a href="/dwclass/" class="dwclass" rel="nofollow">New Class</a></span>
+    <span><a href="/preview/" class="preview" rel="nofollow">Print Class</a></span>
     <span><a href="/logout">Logout</a></span>
     <span id="userbox">
         <a href="/account/" id="userlink">User</a>

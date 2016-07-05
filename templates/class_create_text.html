@@ -1,0 +1,70 @@
+    <div class="p8x11"><div class="white-rounded">
+        <span class="half-width">
+            <div class="whitediv">
+                <div class="classname">
+                    {{ object.class_name }}
+                </div>
+                <div class="text">{{ object.tagline }}</div>
+            </div>
+        </span>
+    {% if object.stats.strip %}
+        <span class="half-width"><div class="box">
+            <div class="blackdiv">
+                <div class="blackspan">Stats</div>
+            </div>
+            <div class="whitediv">
+                <div class="text">{{ object.stats.strip|linebreaks }}</div>
+            </div>
+        </div></span>
+    {% endif %}
+    {% if object.quest.strip %}
+        <span class="half-width"><div class="box">
+            <div class="blackdiv">
+                <div class="blackspan">Quest</div>
+            </div>
+            <div class="whitediv">
+                <div class="text">{{ object.quest.strip|linebreaks }}</div>
+            </div>
+        </div></span>
+    {% endif %}
+    {% if object.drive.strip %}
+        <span class="half-width"><div class="box">
+            <div class="blackdiv">
+                <div class="blackspan">Drive</div>
+            </div>
+            <div class="whitediv">
+                <div class="text">{{ object.drive.strip|linebreaks }}</div>
+            </div>
+        </div></span>
+    {% endif %}
+    {% if object.aspect.strip %}
+        <span class="half-width"><div class="box">
+            <div class="blackdiv">
+                <div class="blackspan">Aspect</div>
+            </div>
+            <div class="whitediv">
+                <div class="text">{{ object.aspect.strip|linebreaks }}</div>
+            </div>
+        </div></span>
+    {% endif %}
+    {% if object.gear.strip %}
+        <span class="half-width"><div class="box">
+            <div class="blackdiv">
+                <div class="blackspan">Gear</div>
+            </div>
+            <div class="whitediv">
+                <div class="text">{{ object.gear.strip|linebreaks }}</div>
+            </div>
+        </div></span>
+    {% endif %}
+    {% if object.bonds.strip %}
+        <span class="half-width"><div class="box">
+            <div class="blackdiv">
+                <div class="blackspan">Bonds</div>
+            </div>
+            <div class="whitediv">
+                <div class="text">{{ object.bonds.strip|linebreaks }}</div>
+            </div>
+        </div></span>
+    {% endif %}
+    </div></div>

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block pagetype %} class="preview"{% endblock pagetype %}
+    {% block html-head %}
+        <meta name="robots" content="noindex">
+        <title>Classes</title>
+    {% endblock html-head %}
+    {% block h1 %}<h1>Custom Compendium Classes</h1>{% endblock h1 %}
+
+{% block content %}
+{% if object_list.exists %}
+    {% for dwclass in object_list %}
+        <div>
+            <a href="/preview/{{ dwclass.id }}" class="button green">View</a>
+            <span class="hpad"><h3>{{ dwclass.class_name }}</h3></span>
+            <span>{{ dwclass.tagline|truncatechars:64 }}</span>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>You have no classes saved.</p>
+    <p>
+        <a href="/dwclass/create" class="button green">Create New Class</a>
+    </p>
+{% endif %}
+{% endblock content %}
