@@ -10,7 +10,7 @@ from nav.models import LoginRequiredMixin
 
 class CreateUserView(FormView):
     form_class = UsernameCreationForm
-    success_url = '/compendiumclasses/'
+    success_url = '/dwclass/'
     template_name = 'user_create.html'
 
     def form_valid(self, form):
@@ -34,7 +34,7 @@ class LoginView(FormView):
     template_name = 'login.html'
 
     def get_success_url(self):
-        self.success_url = self.request.GET.get('next', '/compendiumclasses/')
+        self.success_url = self.request.GET.get('next', '/dwclass/')
         return super(LoginView, self).get_success_url()
 
     def form_valid(self, form):

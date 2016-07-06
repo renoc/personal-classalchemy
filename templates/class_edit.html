@@ -14,7 +14,66 @@
 <br />
 <form method="post">
     {% csrf_token %}
-    {{ form }}
+    <span class="inbloc pad">
+        {{ form.class_name.errors }}
+        {{ form.class_name.label }}<br />
+        {{ form.class_name }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.tagline.errors }}
+        {{ form.tagline.label }}<br />
+        {{ form.tagline }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.quest.errors }}
+        {{ form.quest.label }}<br />
+        {{ form.quest }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.stats.errors }}
+        {{ form.stats.label }}<br />
+        {{ form.stats }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.drive.errors }}
+        {{ form.drive.label }}<br />
+        {{ form.drive }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.aspect.errors }}
+        {{ form.aspect.label }}<br />
+        {{ form.aspect }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.bonds.errors }}
+        {{ form.bonds.label }}<br />
+        {{ form.bonds }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.gear.errors }}
+        {{ form.gear.label }}<br />
+        {{ form.gear }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.starting_left.errors }}
+        {{ form.starting_left.label }}<br />
+        {{ form.starting_left }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.starting_right.errors }}
+        {{ form.starting_right.label }}<br />
+        {{ form.starting_right }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.advanced_low.errors }}
+        {{ form.advanced_low.label }}<br />
+        {{ form.advanced_low }}
+    </span>
+    <span class="inbloc pad">
+        {{ form.advanced_high.errors }}
+        {{ form.advanced_high.label }}<br />
+        {{ form.advanced_high }}
+    </span>
     <p>
         <button type='submit' class="button yellow">Submit Changes</button>
     </p>

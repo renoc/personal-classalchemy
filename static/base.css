@@ -1,6 +1,6 @@
 .main .main, .about .about, .create_user .create_user, .dwclass .dwclass,
 .compendium .compendium, .combined .combined, .character .character,
-.login .login, .preview .preview, .user .user, .paq .paq { color: #FC9; }
+.login .login, .bchar .bchar, .user .user, .paq .paq { color: #FC9; }
 
 .hpad {
     display: inline-block;
@@ -14,6 +14,9 @@
 .high-top { margin-top: 40px; }
 .inbloc {
     display: inline-block;
+}
+.inbloc input[type="text"] {
+    min-width: 600px;
 }
 
 body {

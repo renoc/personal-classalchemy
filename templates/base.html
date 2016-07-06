@@ -14,15 +14,13 @@
     <span><a href="/about" class="about">About</a></span>
     <span><a href="/BaseCharacterSheet" class="bchar">Character Sheet</a></span>
 {% if user.is_authenticated %}
-    <span><a href="/dwclass/" class="dwclass" rel="nofollow">New Class</a></span>
-    <span><a href="/preview/" class="preview" rel="nofollow">Print Class</a></span>
+    <span><a href="/dwclass/" class="dwclass preview" rel="nofollow">New Class</a></span>
     <span><a href="/logout">Logout</a></span>
     <span id="userbox">
         <a href="/account/" id="userlink">User</a>
         <input type="text" id="username_display" value="{{ user.get_username }}" readonly />
     </span>
 {% else %}
-    {% include 'submenu.html' %}
     <span><a href="/create_user" class="create_user">Create User</a></span>
     <span><a href="/login" class="login"><span>Login</span></a></span>
     <span id="userbox"><span id="userlink">No User</span> <input type="text" id="username_display" value="" readonly /></span>
