@@ -12,6 +12,10 @@
     {{ form.non_field_errors }}
     {% csrf_token %}
     {{ form }}
+    <br />
     <button type="submit" class="button green">Send</button>
 </form>
+<span class='red'>
+    Do Not include personally identifiable information. Messages are semi-public.
+</span>
 {% endblock content %}
