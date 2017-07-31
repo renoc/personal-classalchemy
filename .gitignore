@@ -1,4 +1,5 @@
 combinedchoices
+suggestionbox
 local_*
 *.pyc
 db.sqlite3

@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^($|index)', views.Home.as_view()),
     url(r'^about', views.About.as_view()),
     url(r'^paq', views.PAQ.as_view()),
+    url(r'^feedback', views.SuggestionView.as_view()),
     # change to case insensitive
     url(r'^BaseCharacterSheet', views.BaseCharacterPreview.as_view()),
     url(r'^print/BaseCharacterSheet', views.BaseCharacterPrint.as_view()),
