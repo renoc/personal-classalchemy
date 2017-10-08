@@ -13,12 +13,11 @@ class UserModelMixin(object):
 
     def get_object(self):
         id = self.kwargs.get('id')
-        return self.model.objects.get_or_404(
-            id=id, user=self.request.user)
+        return self.model.objects.get_or_404(id=id, user=self.request.user)
 
     def get_queryset(self):
-        self.queryset = self.model.objects.get_user_objects(
-            user=self.request.user)
+        self.queryset = self.model.objects.filter_user_objects(
+            self.request.user)
         return super(UserModelMixin, self).get_queryset()
 
 
@@ -30,8 +29,7 @@ class DWClassMixin(LoginRequiredMixin, UserModelMixin, object):
     def get_success_url(self):
         messages.success(
             self.request, '%s Class Updated.' % self.object.class_name)
-        id = self.object.id
-        self.success_url = "/dwclass/%s" % id
+        self.success_url = "/dwclass/%s" % self.object.id
         return super(DWClassMixin, self).get_success_url()
 
 

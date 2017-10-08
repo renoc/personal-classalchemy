@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 
 class UserModelManager(models.QuerySet):
 
-    def get_user_objects(self, user):
+    def filter_user_objects(self, user):
         return self.filter(user=user)
 
     def get_or_404(self, *args, **kwargs):
